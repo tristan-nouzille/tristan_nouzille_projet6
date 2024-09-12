@@ -1,1 +1,2 @@
-mainloop()
+def mainloop():
+    pass
