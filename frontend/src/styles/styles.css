@@ -1,5 +1,22 @@
+body {
+    font-family: sans-serif;
+    margin: 0; /* Vous ne connaissez pas encore cette propriété mais elle permet de s'assurer que nos éléments prennent bien toute la largeur de la page */
+}
 
+
+.banniere
+{
+    background: linear-gradient(90deg, rgb(214, 21, 21));
+}
+.img
+{
+    width: 127px ;
+    height: 94px;
+}
 .nom-site {
     color: rgb(233, 0, 0);
 }
   
+.banner {
+    background-color: linear(to right,#000046, #1CB5E0);
+}
