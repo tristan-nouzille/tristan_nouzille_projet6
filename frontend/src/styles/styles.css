@@ -1,32 +1,25 @@
-body {
-    font-family: sans-serif;
-    margin: 0; /* Vous ne connaissez pas encore cette propriété mais elle permet de s'assurer que nos éléments prennent bien toute la largeur de la page */
-}
-
-
-.banniere
-{
+.banniere {
     background-color: #61787F;
-    
+    height: 150px; /* Fixe une hauteur pour la bannière */
+    display: flex; /* Utilise flexbox pour aligner le logo et le texte */
+    align-items: center; /* Centre verticalement les éléments */
+    justify-content: center; /* Sépare les éléments de manière égale */
+    padding: 0 50px; /* Ajoute un espace intérieur à gauche et à droite */
+    position: fixed; /* Fixe la bannière en haut de la page */
+    width: 100%; /* Fait en sorte que la bannière occupe toute la largeur de l'écran */
+    top: 0; /* Place la bannière en haut */
+    z-index: 1000; /* Assure que la bannière reste au-dessus des autres éléments */
 }
-#logo
-{
-    width: 200px;
-    height: 150px;
-    position: relative;
-    top: 30px;
-    left: 50px;
+
+.logo {
+    width: 150px; /* Largeur de l'image */
+    height: auto; /* Garde le ratio de l'image */
 }
-.titre {
-    
-    height: 30px;
-    line-height: 10px;
+
+#titre {
+    font-size: 50px;
+    color: white; /* Met le texte en blanc pour le contraster avec le fond */
+    line-height: 1; /* Ajuste la hauteur de ligne pour le texte */
     text-align: center;
-
-
-
 }
-  
-.banner {
-    background-color: linear(to right,#000046, #1CB5E0);
-}
+
