@@ -6,15 +6,25 @@ body {
 
 .banniere
 {
-    background: linear-gradient(90deg, rgb(214, 21, 21));
+    background-color: #61787F;
+    
 }
-.img
+#logo
 {
-    width: 127px ;
-    height: 94px;
+    width: 200px;
+    height: 150px;
+    position: relative;
+    top: 30px;
+    left: 50px;
 }
-.nom-site {
-    color: rgb(233, 0, 0);
+.titre {
+    
+    height: 30px;
+    line-height: 10px;
+    text-align: center;
+
+
+
 }
   
 .banner {
