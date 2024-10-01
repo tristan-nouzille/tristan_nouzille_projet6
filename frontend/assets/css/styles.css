@@ -46,17 +46,17 @@ section{
 
 .colonne {
     flex: 1;
-    justify-items: auto;
+    align-content: center;
+    justify-content: start;
 }
 
 .image-col {
-    position: relative; /* Centrer l'image dans sa colonne */
-    left: 10px;
+    text-align: center;
+    size-adjust: 500px auto;
 }
 
 .topImg {
-    width: 100%;
-    max-width: 300px; /* Limite la taille de l'image */
+    width: 80%; /* Limite la taille de l'image */
     height: auto;
 }
 
@@ -73,6 +73,7 @@ section{
 .text-col h2 {
     font-size: 60px;/* Taille de police modérée pour le titre */
     padding-bottom: 10px;
+    
 }
 
 .text-col p {
