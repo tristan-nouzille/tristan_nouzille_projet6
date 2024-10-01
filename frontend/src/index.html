@@ -13,18 +13,31 @@
         </header>
 
         <main>
-           <section>
-             <h1 class="bestmovie"><strong>Meilleur film</strong></h1>
+            <section>
+                <h1 class="bestmovie"><strong>Meilleur film</strong></h1>
                 <div class="cadre">
-                    <img src="https://m.media-amazon.com/images/M/MV5BZDMwODgwOGItNTJjNS00NDk2LTlkYzEtYzRjOTU5YTBlZGY5XkEyXkFqcGdeQXVyNTM3MDMyMDQ@._V1_UY268_CR9,0,182,268_AL_.jpg">
-                    <h2>Notuku potu</h2>
-
-                    <p>Notuku Potu est une histoire de crime mêlée d'éléments d'horreur et de suspense. L'histoire raconte celui d'un homme qui, après la mort d'une femme, <br>
-                    est entraîné dans un monde de mystère et de conspiration.</p>
-
-                    <a itemprop="url" href="http://localhost:8000/api/v1/titles/9008642?format=api"><button type="button" class="btn btn-danger">Détails</button></a>
+                    <!-- Colonne pour l'image -->
+                    <div class="colonne image-col">
+                        <img class="topImg" src="https://m.media-amazon.com/images/M/MV5BZDMwODgwOGItNTJjNS00NDk2LTlkYzEtYzRjOTU5YTBlZGY5XkEyXkFqcGdeQXVyNTM3MDMyMDQ@._V1_UY268_CR9,0,182,268_AL_.jpg" alt="Notuku Potu">
+                    </div>
+            
+                    <!-- Colonne pour le texte divisé en 3 lignes -->
+                    <div class="colonne text-col">
+                        <div class="ligne">
+                            <h2>Notuku Potu</h2>
+                        </div>
+                        <div class="ligne">
+                            <p>Notuku Potu est une histoire de crime mêlée d'éléments d'horreur et de suspense. L'histoire raconte celui d'un homme qui, après la mort d'une femme, est entraîné dans un monde de mystère et de conspiration.</p>
+                        </div>
+                        <div class="ligne">
+                            <a itemprop="url" href="http://localhost:8000/api/v1/titles/9008642?format=api">
+                                <button type="button" class="btn btn-danger">Détails</button>
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </section>
+            
 
             <section>
                 <div>
