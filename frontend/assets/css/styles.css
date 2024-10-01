@@ -86,9 +86,12 @@ section{
 .btn-danger {
     background-color: red;
     color: white;
-    border: none;
+    border-radius: 25%;
     padding: 10px 20px;
     cursor: pointer;
+    position: relative;
+    left: 80%;
+    
 }
 
 .bestmovie {
@@ -96,24 +99,36 @@ section{
     margin-bottom: 30px;
 }
 
-@media (max-width: 100%) {
-    
+@media (max-width: 768px) {
     .cadre {
         flex-direction: column; /* Colonnes empilées sur petits écrans */
-        width: 100%;
+        width: 90%; /* Ajuster la largeur pour les petits écrans */
     }
 
     .topImg {
-        max-width: 100%;
+        max-width: 100%; /* L'image occupera 100% de la largeur du conteneur */
     }
 
     .text-col h2 {
-        font-size: 50px;
-
+        font-size: 2.5em; /* Réduire la taille du titre pour les petits écrans */
     }
 
     .text-col p {
-        font-size: 16px;
+        font-size: 1.2em; /* Réduire la taille du texte pour les petits écrans */
+    }
+
+    .bestmovie {
+        margin-left: 5%; /* Ajuster la marge pour les petits écrans */
+    }
+}
+
+@media (max-width: 480px) {
+    .text-col h2 {
+        font-size: 2em; /* Taille de police encore plus petite pour les très petits écrans */
+    }
+
+    .text-col p {
+        font-size: 1em; /* Réduire encore la taille du texte */
     }
 }
 
