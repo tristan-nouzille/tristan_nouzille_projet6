@@ -1,3 +1,7 @@
+body{
+    margin: 0;
+}
+
 .banniere {
     background-color: #61787F;
     height: 100px; /* Fixe une hauteur pour la bannière */
@@ -25,17 +29,18 @@
 
 section{
 
-    margin: 100px 0;
+    margin: 50px 0;
     padding: 10px;
     display: block;
 }
 .cadre {
     border: 5px solid black; /* Bordure noire */
     margin: 0 auto;
-    width: 1000px;
+    width: 70%;
     display: flex; /* Flexbox pour créer les deux colonnes */
     align-items: center; /* Centrer verticalement les colonnes */
     padding: 10px;
+    position: relative;
     
 }
 
@@ -86,8 +91,7 @@ section{
 }
 
 .bestmovie {
-    position: relative;
-    left: 450px; /* Centrer le titre H1 */
+    margin-left: 15%;
     margin-bottom: 30px;
 }
 
@@ -111,4 +115,5 @@ section{
         font-size: 16px;
     }
 }
+
 
