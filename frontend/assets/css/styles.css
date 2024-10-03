@@ -115,7 +115,7 @@ section{
 }
 
 .film{
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 input[type="checkbox"] {
@@ -149,6 +149,9 @@ ul {
     transition: max-height 0.4s ease-out;
     list-style-type: none;
     padding: 0;
+    position: relative;
+    left: 35%;
+    bottom: 85px;
 }
 
 /* Afficher la liste lorsque la checkbox est cochée */
@@ -161,6 +164,9 @@ input[type="checkbox"]:checked ~ ul {
 ul li {
     background-color: #333;
     border-bottom: 1px solid #ddd;
+    align-items: center;
+    text-align: center;
+    width: 300px;
 }
 
 ul li a {
