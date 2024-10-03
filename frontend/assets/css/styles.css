@@ -1,5 +1,10 @@
 body{
     margin: 0;
+    background-color: rgb(27, 25, 25);
+}
+
+p, h1, h2, h3, a{
+    color: aliceblue;
 }
 
 .banniere {
@@ -97,9 +102,18 @@ section{
     
 }
 
-.bestmovie {
+.categorie {
     margin-left: 15%;
     margin-bottom: 30px;
+}
+
+.container{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2,1fr);
+    align-items: center;
+    
+
 }
 
 @media (max-width: 768px) {
