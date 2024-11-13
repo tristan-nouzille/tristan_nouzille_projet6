@@ -39,54 +39,48 @@ section{
     display: block;
 }
 .cadre {
-    border: 5px solid black; /* Bordure noire */
+    display: flex; /* Affiche les colonnes de manière horizontale */
+    flex-direction: row; /* Les enfants de .cadre seront organisés en ligne */
+    border: 5px solid black;
     margin: 0 auto;
     width: 70%;
-    display: flex; /* Flexbox pour créer les deux colonnes */
-    align-items: center; /* Centrer verticalement les colonnes */
-    padding: 10px;
+    padding: 20px;
     position: relative;
-    
 }
 
-.colonne {
-    flex: 1;
-    align-content: center;
-    justify-content: start;
-}
 
-.image-col {
-    text-align: center;
-    size-adjust: 500px auto;
-}
 
-.topImg {
-    width: 80%; /* Limite la taille de l'image */
-    height: auto;
+.toPimage {
+    grid-column: 1; /* Place l'image dans la première colonne */
+    grid-row: 2;    /* Place l'image dans la deuxième ligne */
+    display: grid;
+    align-content: space-between;
+    justify-items: center;
+
 }
 
 .text-col {
-    flex: 2; /* Flexbox pour organiser les lignes dans la deuxième colonne */
-    flex-direction: column;
-    justify-content: space-between; /* Espace entre chaque ligne */
-}
-
-.ligne {
-    margin-bottom: 20px; /* Espace entre les lignes */
+    flex: 1;
+    padding: 1px;
+    font-size: 40px;
+    display: grid;
+    align-items: center;
 }
 
 .text-col h2 {
-    font-size: 60px;/* Taille de police modérée pour le titre */
-    padding-bottom: 10px;
-    line-height: 1.5;
-    
+    font-size: 70px; /* Taille de police modérée pour le titre */
+    line-height: 1;
 }
 
-.text-col p {
-    font-size: 25px; /* Taille de police pour le paragraphe */
+.text-col-p {
+    font-size: 25px;
     line-height: 1.5;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     font-style: italic;
+    grid-column: 2;
+    grid-row: 2;
+    display: grid;
+    place-items: center;
 }
 
 .btn-danger {
@@ -95,12 +89,15 @@ section{
     border-radius: 50px;
     padding: 10px 20px;
     cursor: pointer;
-    position: relative;
-    left: 70%;
     width: 200px;
     height: 70px;
+    position: relative;
+    top: 200px;
+    left: 400px;
+    
     
 }
+
 
 .categorie {
     margin-left: 15%;
@@ -110,13 +107,18 @@ section{
 .container{
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2,1fr);
-    align-items: center;
+    grid-template-rows: 50px 270px;
+}
+.container2{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    justify-items: center;
+    gap: 20px;
 }
 
-.film{
-    margin-bottom: 20px;
-}
+
+
 
 input[type="checkbox"] {
     display: none;

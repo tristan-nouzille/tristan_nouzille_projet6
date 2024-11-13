@@ -5,6 +5,7 @@
         <title>JustStreamIt</title>
         <link rel="stylesheet" href="../assets/css/bootstrap.css">
         <link rel="stylesheet" href="../assets/css/styles.css">
+        <script type="module" src="../assets/js/script.js"defer></script>
     </head>
     <body>
         <section>
@@ -16,47 +17,17 @@
 
         <main>
             <section>
-                <div id="topFilmContent" class="categorie cadre"></div>
-                 <!--h1 class="categorie cadre"><strong>Meilleur film</strong></h1-->
-                </div>
+                <h1 class="categorie">Le meilleur Film</h1>
+                <div id="topFilmContent"></div>
             </section>
             
-            <section>
-                <div>
-
-                    <h1 class = "categorie"><strong>Les mieux notés</strong></h1>
-                    
-                    <div class=".container">
-                        <div class="film">
-                            <div>
-                                <a itemprop="url" href="http://localhost:8000/api/v1/titles/1508669"><button type="button" class="btn btn-secondary">Détails</button></a>
-                            </div>
-                            <img src="https://m.media-amazon.com/images/M/MV5BNDEyYTA5OWEtYjNiYS00MGZlLThjYzEtMTc1Zjk2NDRmZmYxXkEyXkFqcGdeQXVyNzIwNTQyMw@@._V1_UY268_CR1,0,182,268_AL_.jpg">
-                            
-                        </div>
-                        <div class="film">
-                            <a itemprop="url" href="http://localhost:8000/api/v1/titles/7822474"><button type="button" class="btn btn-secondary">Détails</button></a>
-                            <img src="https://m.media-amazon.com/images/M/MV5BOWVmOWRmMWMtMDc2OC00NGM2LTllOTAtMmY5NjVhM2YzYjVlXkEyXkFqcGdeQXVyOTc2MTgwNjY@._V1_UY268_CR3,0,182,268_AL_.jpg">
-                        </div>
-                        <div class="film">
-                            <a itemprop="url" href="http://localhost:8000/api/v1/titles/8571428"><button type="button" class="btn btn-secondary">Détails</button></a>
-                            <img src="https://m.media-amazon.com/images/M/MV5BNjZhYWVhNjktNDRmNS00NGUyLThjZTgtYmU4NmQzYzIyZTk4XkEyXkFqcGdeQXVyMjkxNzQ1NDI@._V1_UY268_CR0,0,182,268_AL_.jpg">
-                        </div>
-                        <a itemprop="url" href="http://localhost:8000/api/v1/titles/9008642"><button type="button" class="btn btn-secondary">Détails</button>
-                           <img src="https://m.media-amazon.com/images/M/MV5BZDMwODgwOGItNTJjNS00NDk2LTlkYzEtYzRjOTU5YTBlZGY5XkEyXkFqcGdeQXVyNTM3MDMyMDQ@._V1_UY268_CR9,0,182,268_AL_.jpg">
-                        </a>
-                        <a itemprop="url" href="http://localhost:8000/api/v1/titles/6735740"><button type="button" class="btn btn-secondary">Détails</button>
-                            <img src="https://m.media-amazon.com/images/M/MV5BZGNiNjVhMTUtYTY0MC00MjQ4LTlhNjAtMmY3ODljMjc5YmJhXkEyXkFqcGdeQXVyMzQwNTU0OTQ@._V1_UY268_CR0,0,182,268_AL_.jpg">
-                        </a>
-                        <a itemprop="url" href="http://localhost:8000/api/v1/titles/11880904"><button type="button" class="btn btn-secondary">Détails</button>
-                           <img src="https://m.media-amazon.com/images/M/MV5BMTZjZjM3NTQtOTFmOS00ZGI3LWI2MGQtMGE3MWNlZTE2OWM3XkEyXkFqcGdeQXVyMTExNzA5NzE4._V1_UY268_CR9,0,182,268_AL_.jpg">
-                        </a>
-                    </div>
-
-                </div>
+            <section class="categorie">
+                <h1><strong>Les mieux notés</strong></h1>
+                <div id="ratedFilms" class="container2 film-card"></div> <!-- Les films les mieux notés seront affichés ici -->
             </section>
+            
 
-            <section>
+            <!--section>
                 <h3 class="categorie"> Catégorie : <a itemprop="url" href="http://localhost:8000/api/v1/titles/?genre_contains=Action">Action</a></h3>
 
                     <div class="container">
@@ -121,11 +92,10 @@
                     <h3 class="categorie">Autre catégories :</h3>
 
                     <div>
-                     <!-- Checkbox pour contrôler le menu -->
+                     <Checkbox pour contrôler le menu 
                         <input type="checkbox" id="toggle-menu">
                         <label for="toggle-menu" class="categorie"></label></h3>
                     
-                     <!-- Liste des catégories qui sera masquée/affichée -->
                         <ul>
                             <li><a itemprop="url" href="http://localhost:8000/api/v1/titles/?genre_contains=Adult">Adult</a></li>
                             <li><a itemprop="url" href="http://localhost:8000/api/v1/titles/?genre_contains=Adventure">Aventure</a></li>
@@ -153,8 +123,7 @@
                         </ul>
                     </div>
                 </div>
-            </section>
+            </section-->
         </main> 
-        <script type="module" src="../assets/js/script.js"></script>
     </body>
 </html>
