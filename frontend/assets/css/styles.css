@@ -117,6 +117,22 @@ section{
     gap: 20px;
 }
 
+/* Assurer que les images sont responsives et bien dimensionnées */
+.carousel-item {
+    width: 100%;
+    height: auto;
+}
+
+/* Optionnel : ajuster la taille des films */
+.carousel-caption {
+    display: none; /* Si tu ne veux pas afficher de texte sur les films */
+}
+
+/* Ajuster l'espacement entre les films */
+.carousel-item .col-2 {
+    padding: 10px; /* Ajoute un peu d'espace entre les films */
+}
+
 
 
 
