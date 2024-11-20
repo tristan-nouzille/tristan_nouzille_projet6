@@ -48,7 +48,9 @@ section{
     position: relative;
 }
 
-
+p{
+    font-size:large;
+}
 
 .toPimage {
     grid-column: 1; /* Place l'image dans la première colonne */
@@ -64,13 +66,9 @@ section{
     padding: 1px;
     font-size: 40px;
     display: grid;
-    align-items: center;
+    
 }
 
-.text-col h2 {
-    font-size: 70px; /* Taille de police modérée pour le titre */
-    line-height: 1;
-}
 
 .text-col-p {
     font-size: 25px;
@@ -80,7 +78,7 @@ section{
     grid-column: 2;
     grid-row: 2;
     display: grid;
-    place-items: center;
+   align-items: start;
 }
 
 .btn-danger {
@@ -90,17 +88,15 @@ section{
     padding: 10px 20px;
     cursor: pointer;
     width: 200px;
-    height: 70px;
+    height: 80px;
     position: relative;
-    top: 200px;
-    left: 400px;
-    
-    
+    top: 220px;
+    left: 430px; 
 }
 
 
 .categorie {
-    margin-left: 15%;
+    margin-left: 5%;
     margin-bottom: 30px;
 }
 
@@ -109,31 +105,126 @@ section{
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: 50px 270px;
 }
-.container2{
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    justify-items: center;
-    gap: 20px;
+.container2 {
+    display: flex;             /* Utilisation de Flexbox pour aligner les images horizontalement */
+    justify-content: space-between; /* Espace égal entre les images */
+    flex-wrap: wrap;           /* Permet à l'affichage de s'ajuster si l'écran est trop petit */
+                  /* Espace de 20px entre les images */
 }
 
-/* Assurer que les images sont responsives et bien dimensionnées */
-.carousel-item {
+.film-item img {
+    width: 200px;  /* Taille des images */
+    height: auto;   /* Garder les proportions de l'image */
+    border-radius: 8px; /* Pour donner un effet arrondi */
+}
+
+/* Limiter la taille des images dans le carrousel pour qu'elles ne couvrent pas les boutons */
+.carousel-inner {
+    overflow: hidden;  /* Empêche les images de déborder */
+}
+
+/* Les images du carrousel */
+.carousel-item img {
+    width: 100%;        /* Réduit la largeur des images à 80% de leur conteneur */
+    height: auto;      /* La hauteur sera ajustée proportionnellement */
+    object-fit: contain; /* L'image s'adapte sans être déformée */
+    margin: 0 auto;    /* Centrer l'image horizontalement */
+}
+
+/* Positionnement des contrôles (Previous et Next) */
+.carousel-control-prev,
+.carousel-control-next {
+    position: absolute;  /* Positionner les contrôles par rapport au carrousel */
+    top: 50%;            /* Centrer les boutons verticalement */
+    transform: translateY(-50%);  /* Centrage parfait */
+    z-index: 10;         /* S'assurer que les boutons soient au-dessus des images */
+    border: none;
+    padding: 10px;
+    width: 5%;           /* Ajustez la largeur des boutons si nécessaire */
+}
+
+/* Placer les boutons de navigation à gauche et à droite */
+.carousel-control-prev {
+    left: 0px;          /* Décalage du bouton "Previous" vers la gauche */
+}
+
+.carousel-control-next {
+    right: 0px;         /* Décalage du bouton "Next" vers la droite */
+}
+
+/* Boutons Next et Previous */
+.carousel-control-prev-icon, .carousel-control-next-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10; /* Assurez-vous que les boutons sont toujours au-dessus du carrousel */
+    width: 5%; /* Vous pouvez ajuster la largeur des boutons si nécessaire */
+    background-color: rgba(0, 0, 0, 10); /* Couleur de fond transparente pour améliorer la visibilité */
+    border: none;
+    padding: 10px;
+}
+
+.carousel-item img {
+    max-width: 100%;    /* Limite la largeur de l'image à 80% de l'élément carrousel */
+    height: auto;      /* Ajuste la hauteur automatiquement */
+    object-fit: contain; /* Assure que l'image reste à l'intérieur de son conteneur sans être coupée */
+    margin: 0 auto;    /* Centrer l'image horizontalement */
+    border-radius: 8px;
+}
+
+
+/* Conteneur de l'image */
+.film-image-container {
+    position: relative;
     width: 100%;
-    height: auto;
+    height: 100%;  /* Assure que la taille est cohérente */
+    overflow: hidden;
 }
 
-/* Optionnel : ajuster la taille des films */
-.carousel-caption {
-    display: none; /* Si tu ne veux pas afficher de texte sur les films */
+/* Assure que l'image occupe toute la taille de son conteneur sans être déformée */
+.film-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;  /* L'image remplit le conteneur sans déformation */
+    transition: transform 0.3s ease;  /* Ajoute une transition pour le zoom de l'image */
 }
 
-/* Ajuster l'espacement entre les films */
-.carousel-item .col-2 {
-    padding: 10px; /* Ajoute un peu d'espace entre les films */
+/* Overlay qui apparaît au survol */
+.film-image-container:hover .overlay {
+    opacity: 1;
+    visibility: visible;
 }
 
+/* Style de l'overlay */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);  /* Filtre transparent */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    padding: 10px;
+}
 
+/* Titre du film dans l'overlay */
+.overlay h5 {
+    margin: 0;
+    font-size: 1.25rem;
+    text-align: center;
+}
+
+/* Effet de zoom léger au survol de l'image */
+.film-image-container:hover img {
+    transform: scale(1.05);  /* Zoom léger */
+}
 
 
 input[type="checkbox"] {
@@ -220,7 +311,19 @@ ul li a {
     .btn-danger{
         margin-right: 5%;
     }
-
+    .banniere {
+        background-color: #61787F;
+        height: 100px; /* Fixe une hauteur pour la bannière */
+        display: flex; /* Utilise flexbox pour aligner le logo et le texte */
+        flex-direction: row;
+        align-items: center; /* Centre verticalement les éléments */
+        justify-content: center; /* Sépare les éléments de manière égale */
+        padding: 0 50px; /* Ajoute un espace intérieur à gauche et à droite */
+        position: absolute; /* Fixe la bannière en haut de la page */
+        width: 100%; /* Fait en sorte que la bannière occupe toute la largeur de l'écran */
+        top: 0; /* Place la bannière en haut */
+         /* Assure que la bannière reste au-dessus des autres éléments */
+    }
 }
 
 @media (max-width: 480px) {
@@ -231,7 +334,33 @@ ul li a {
     .text-col p {
         font-size: 1em; /* Réduire encore la taille du texte */
     }
+    .banniere {
+        background-color: #61787F;
+        height: 100px; /* Fixe une hauteur pour la bannière */
+        display: flex; /* Utilise flexbox pour aligner le logo et le texte */
+        flex-direction: column;
+        align-items: center; /* Centre verticalement les éléments */
+        justify-content: center; /* Sépare les éléments de manière égale */
+        padding: 0 50px; /* Ajoute un espace intérieur à gauche et à droite */
+        position: absolute; /* Fixe la bannière en haut de la page */
+        width: 100%; /* Fait en sorte que la bannière occupe toute la largeur de l'écran */
+        top: 0; /* Place la bannière en haut */
+
+         /* Assure que la bannière reste au-dessus des autres éléments */
+    }
+
 }
+/* Extra small devices (portrait phones, less than 576px)
+@media (max-width: 575.98px) {  }
+/*Small devices (landscape phones, less than 768px)
+@media (max-width: 767.98px) {  }
+
+ Medium devices (tablets, less than 992px)
+@media (max-width: 991.98px) {  }
+
+/* Large devices (desktops, less than 1200px)
+@media (max-width: 1199.98px) {  }*/
+
 
 
 

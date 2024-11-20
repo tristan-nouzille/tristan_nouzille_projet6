@@ -3,10 +3,20 @@
     <head>
         <meta charset="utf-8">
         <title>JustStreamIt</title>
-        <link rel="stylesheet" href="../assets/css/bootstrap.css">
+    
+        <!-- Bootstrap CSS local -->
+        <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+    
+        <!-- Ton propre fichier CSS -->
         <link rel="stylesheet" href="../assets/css/styles.css">
-        <script type="module" src="../assets/js/script.js"defer></script>
+    
+        <!-- Bootstrap JS local (avec bundle.min.js pour le JS de Bootstrap inclu) -->
+        <script src="../assets/js/bootstrap.bundle.min.js"></script>
+    
+        <!-- Ton script JS (en mode module) -->
+        <script type="module" src="../assets/js/script.js" defer></script>
     </head>
+    
     <body>
         <section>
             <header class="banniere">
@@ -23,19 +33,45 @@
             
             <section class="categorie">
                 <h1><strong>Les mieux notés</strong></h1>
-                <div id="ratedFilms" class="container2 film-card"></div> <!-- Les films les mieux notés seront affichés ici -->
+                <div id="ratedFilms" class="container2 film-image-container:hover img "></div> <!-- Les films les mieux notés seront affichés ici -->
             </section>
             
 
             <section class="categorie">
                 <h2>Biographie :</h2>
-                <div id="biographyFilms" class="container2 film-card"></div>
+                <div id="carouselExampleControlsBiography" class="carousel slide" data-ride="carousel">
+                    <div id="biographyFilms" class="carousel-inner">
+                        <!-- Les items du carrousel seront ajoutés dynamiquement ici -->
+                    </div>
+                    <a class="carousel-control-prev left" href="#carouselExampleControls" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only"></span>
+                    </a>
+                    <a class="carousel-control-next rigth" href="#carouselExampleControls" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only"></span>
+                    </a>
+                </div>
             </section>
             
             <section class="categorie">
                 <h2>Horreur :</h2>
-                <div id="horrorFilms" class="container2 film-card"></div>
+                <div id="carouselExampleControlsHorror" class="carousel slide" data-ride="carousel">
+                    <div id="horrorFilms" class="carousel-inner">
+                        <!-- Les slides seront ajoutées ici par JavaScript -->
+                    </div>
+                    <a class="carousel-control-prev" href="#carouselExampleControlsHorror" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only"></span>
+                    </a>
+                    <a class="carousel-control-next" href="#carouselExampleControlsHorror" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only"></span>
+                    </a>
+                </div>
             </section>
+            
+            
             
             
             
@@ -107,5 +143,21 @@
                 </div>
             </section-->
         </main> 
+        <!-- Modale Bootstrap pour afficher les détails du film -->
+        <div class="modal fade" id="filmDetailsModal" tabindex="-1" aria-labelledby="filmDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="filmDetailsModalLabel">Détails du Film</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="filmDetailsContent">
+                    <!-- Contenu des détails du film (sera injecté via JavaScript) -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </body>
 </html>
+
+  
