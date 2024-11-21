@@ -209,6 +209,7 @@ function showFilmDetails(film) {
 
 
 // Fonction pour afficher les films les mieux notés (top 6)
+// Fonction pour afficher les films les mieux notés (6 films)
 function displayTopRatedFilms(films) {
     // Trier les films par note de manière décroissante (du mieux noté au moins bien noté)
     const topRatedFilms = films.sort((a, b) => b.imdb_score - a.imdb_score);
@@ -226,15 +227,44 @@ function displayTopRatedFilms(films) {
             const filmElement = document.createElement('div');
             filmElement.classList.add('film-item'); // Classe pour chaque film
 
-            // Structure HTML pour chaque film, y compris l'image
+            // Structure HTML pour chaque film avec overlay
             filmElement.innerHTML = `
-                <img src="${film.image_url}" alt="${film.title}">
+                <div class="film-image-container">
+                    <img src="${film.image_url}" class="d-block w-100" alt="${film.title}">
+                    <div class="overlay">
+                        <h5>${film.title}</h5>
+                        <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
+                    </div>
+                </div>
             `;
 
+            // Ajouter l'élément film à la section
             ratedFilms.appendChild(filmElement);
         }
     }
+
+    // Attacher l'eventListener au bouton "Détails" après que tous les films aient été ajoutés au DOM
+    const detailButtons = ratedFilms.querySelectorAll('.detailsButton');
+    detailButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Récupérer l'ID du film depuis l'attribut 'data-film-id'
+            const filmId = button.getAttribute('data-film-id');
+            console.log('Film ID cliqué :', filmId); // Vérifiez l'ID récupéré dans la console
+
+            // Trouver le film correspondant à cet ID
+            const film = topRatedFilms.find(f => f.id.toString() === filmId);  // Assurez-vous que la comparaison est correcte
+
+            if (film) {
+                // Si le film existe, afficher les détails
+                showFilmDetails(film);
+            } else {
+                // Si le film est introuvable
+                console.error('Film introuvable avec l\'ID', filmId);
+            }
+        });
+    });
 }
+
 
 
 function displayFilmsInCarousel(genre, films) {
