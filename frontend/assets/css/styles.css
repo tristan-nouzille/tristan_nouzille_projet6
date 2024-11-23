@@ -38,6 +38,34 @@ section{
     padding: 10px;
     display: block;
 }
+#categoriesIcon {
+    position: absolute; /* Positionner l'icône dans la bannière */
+    left: 20px; /* Aligner l'icône sur la gauche */
+    top: 50%; /* Centrer verticalement */
+    transform: translateY(-50%); /* Ajuster pour le centrer parfaitement */
+    font-size: 24px; /* Taille de l'icône */
+    background-color: transparent; /* Supprimer l'arrière-plan */
+    border: none; /* Supprimer les bordures */
+    color: white; /* Assortir la couleur à celle du texte du titre */
+    cursor: pointer; /* Ajouter un pointeur survolant */
+    z-index: 1100; /* Assure que l'icône est au-dessus des autres éléments */
+}
+
+#categoriesIcon i {
+    font-size: inherit; /* Appliquer la taille de l'icône au conteneur */
+    vertical-align: middle; /* Centrer l'icône dans le bouton */
+}
+
+.categories-nav {
+    transition: transform 0.3s ease; /* Ajoute une animation pour afficher/masquer la barre */
+    transform: translateX(100%); /* Par défaut, cache la barre en dehors de l'écran */
+}
+
+.categories-nav.active {
+    transform: translateX(0); /* Affiche la barre lorsqu'elle est active */
+}
+
+
 .cadre {
     display: flex; /* Affiche les colonnes de manière horizontale */
     flex-direction: row; /* Les enfants de .cadre seront organisés en ligne */
@@ -283,6 +311,15 @@ ul li a {
     padding: 10px;
     text-decoration: none;
     color: #ddd;
+}
+
+footer {
+    background-color: #61787F;
+    color: white; /* Optionnel : texte en blanc pour le contraste */
+    padding: 20px; /* Optionnel : ajoute de l'espace autour du contenu */
+    text-align: center; /* Optionnel : centre le texte */
+    
+
 }
 
 

@@ -38,7 +38,6 @@ async function fetchFilmsByGenre(genre) {
 }
 
 
-
 // Fonction pour récupérer tous les films (avec pagination)
 async function fetchData() {
     try {
@@ -206,8 +205,6 @@ function showFilmDetails(film) {
 }
 
 
-
-
 // Fonction pour afficher les films les mieux notés (top 6)
 // Fonction pour afficher les films les mieux notés (6 films)
 function displayTopRatedFilms(films) {
@@ -268,100 +265,88 @@ function displayTopRatedFilms(films) {
 
 
 function displayFilmsInCarousel(genre, films) {
-    const container = document.getElementById(`${genre}Films`);  // Conteneur du carrousel pour chaque genre
-    container.innerHTML = '';  // Vider le conteneur avant d'ajouter de nouveaux films
+    const container = document.getElementById(`${genre}Films`);
+    container.innerHTML = '';
 
-    // Vérifier si la liste de films est vide
     if (!films || films.length === 0) {
         console.error(`Aucun film trouvé pour le genre ${genre}.`);
         return;
     }
 
-    // Découper les films en groupes de 6 films par slide
     const filmsPerSlide = 6;
-    const numSlides = Math.ceil(films.length / filmsPerSlide);  // Nombre de slides nécessaires
+    const numSlides = Math.ceil(films.length / filmsPerSlide);
 
-    // Créer les slides
+    const fragment = document.createDocumentFragment();
+
     for (let slideIndex = 0; slideIndex < numSlides; slideIndex++) {
-        const slideFilms = films.slice(slideIndex * filmsPerSlide, (slideIndex + 1) * filmsPerSlide);  // Films pour cette slide
+        const slideFilms = films.slice(slideIndex * filmsPerSlide, (slideIndex + 1) * filmsPerSlide);
 
-        // Créer l'élément pour la slide
         const slideElement = document.createElement('div');
         slideElement.classList.add('carousel-item');
-
-        // Ajouter la classe 'active' à la première slide
         if (slideIndex === 0) {
             slideElement.classList.add('active');
         }
 
-        // Créer une ligne de films pour cette slide
         const slideInnerContainer = document.createElement('div');
         slideInnerContainer.classList.add('row');
 
         slideFilms.forEach(film => {
-            // Vérification des films et de leur ID
-            console.log(`Film dans le carrousel : ${film.title}, ID : ${film.id}`);
-
+            const imageUrl = film.image_url || 'https://placehold.co/100x200.png';
             const filmElement = document.createElement('div');
-            filmElement.classList.add('col-md-2');  // Class pour chaque image de film
+            filmElement.classList.add('col-md-2');
 
-            // Créer le conteneur d'image avec overlay
             filmElement.innerHTML = `
                 <div class="film-image-container">
-                    <img src="${film.image_url}" class="d-block w-100" alt="${film.title}">
+                    <img src="${imageUrl}" class="d-block w-100" alt="${film.title}" onerror="this.src='default-image.jpg';">
                     <div class="overlay">
                         <h5>${film.title}</h5>
-                        <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
+                        <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton" aria-label="Voir les détails du film ${film.title}">
+                            Détails
+                        </button>
                     </div>
                 </div>
             `;
-
             slideInnerContainer.appendChild(filmElement);
         });
 
-        // Ajouter la ligne de films à la slide
         slideElement.appendChild(slideInnerContainer);
-        container.appendChild(slideElement);
+        fragment.appendChild(slideElement);
     }
 
-    // Attacher l'eventListener au bouton "Détails" après que tous les films aient été ajoutés au DOM
+    container.appendChild(fragment);
+
     const detailButtons = container.querySelectorAll('.detailsButton');
     detailButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Récupérer l'ID du film depuis l'attribut 'data-film-id'
+        button.addEventListener('click', function () {
             const filmId = button.getAttribute('data-film-id');
-            console.log('Film ID cliqué :', filmId); // Vérifiez l'ID récupéré dans la console
-
-            // Trouver le film correspondant à cet ID
-            const film = films.find(f => f.id.toString() === filmId);  // Assurez-vous que la comparaison est correcte
+            const film = films.find(f => String(f.id) === filmId);
 
             if (film) {
-                // Si le film existe, afficher les détails
                 showFilmDetails(film);
             } else {
-                // Si le film est introuvable
                 console.error('Film introuvable avec l\'ID', filmId);
             }
         });
     });
 
-    // Initialiser le carrousel si nécessaire
     initCarousel(genre);
 }
 
 
+
 // Fonction pour initialiser le carrousel avec Bootstrap
 function initCarousel(genre) {
-    // Initialiser le carrousel pour chaque genre
     const carouselElement = document.getElementById(`carouselExampleControls${capitalizeFirstLetter(genre)}`);
     if (carouselElement) {
+        console.log(`Initialisation du carrousel pour ${genre}`);
         const bootstrapCarousel = new bootstrap.Carousel(carouselElement, {
-            interval: 3000,  // Intervalle entre les slides
-            ride: 'carousel'  // Démarre le carrousel automatiquement
+            interval: 3000,
+            ride: 'carousel'
         });
+    } else {
+        console.error(`Carrousel non trouvé pour le genre ${genre}`);
     }
 }
-
 
 // Fonction pour capitaliser la première lettre du genre
 function capitalizeFirstLetter(string) {
@@ -372,8 +357,6 @@ function capitalizeFirstLetter(string) {
 genresToDisplay.forEach(genre => {
     fetchFilmsByGenre(genre);  // Récupérer les films pour chaque genre
 });
-
-
 
 // Appeler la fonction pour récupérer les films généraux (si nécessaire)
 fetchData();
