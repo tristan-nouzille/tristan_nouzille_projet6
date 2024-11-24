@@ -345,8 +345,14 @@ footer {
         margin-left: 5%; /* Ajuster la marge pour les petits écrans */
     }
 
-    .btn-danger{
-        margin-right: 5%;
+    .btn-danger {
+        width: 90%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
+        height: 50px; /* Ajuster la hauteur si nécessaire pour les écrans plus petits */
+        font-size: 14px; /* Réduire la taille de police sur les petits écrans */
+        position: relative;
+        top: 220px;
+        left: 200px;
+
     }
     .banniere {
         background-color: #61787F;
@@ -363,7 +369,7 @@ footer {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 940px) {
     .text-col h2 {
         font-size: 2em; /* Taille de police encore plus petite pour les très petits écrans */
     }
@@ -385,18 +391,18 @@ footer {
 
          /* Assure que la bannière reste au-dessus des autres éléments */
     }
+    .btn-danger {
+        width: 90%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
+        height: 50px; /* Ajuster la hauteur si nécessaire pour les écrans plus petits */
+        font-size: 14px; /* Réduire la taille de police sur les petits écrans */
+        position: relative;
+        top: 220px;
+        left: 200px;
+
+    }
 
 }
-/* Extra small devices (portrait phones, less than 576px)
-@media (max-width: 575.98px) {  }
-/*Small devices (landscape phones, less than 768px)
-@media (max-width: 767.98px) {  }
 
- Medium devices (tablets, less than 992px)
-@media (max-width: 991.98px) {  }
-
-/* Large devices (desktops, less than 1200px)
-@media (max-width: 1199.98px) {  }*/
 
 
 

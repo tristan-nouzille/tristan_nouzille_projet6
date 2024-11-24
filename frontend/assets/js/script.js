@@ -119,12 +119,15 @@ async function displayTopFilm(film) {
         // Vérifier si filmDetails contient la description
         const descriptionToDisplay = filmDetails.description || 'Aucune description disponible.';
 
+        // Vérification de l'URL de l'image du film
+        const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';  // Image par défaut si l'URL est manquante ou invalide
+
         topFilmContent.innerHTML = `
             <div class="cadre container">
                 <div>
                     <h2>${film.title} (${film.year})</h2>
                     <div class="toPimage">
-                        <img src="${film.image_url}" class="topImg" alt="${film.title}">
+                        <img src="${imageUrl}" class="topImg" alt="${film.title}" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
                     </div>
                 </div>
                 <div class="text-col-p">
@@ -149,6 +152,7 @@ async function displayTopFilm(film) {
 }
 
 
+
 function showFilmDetails(film) {
     console.log("Film reçu dans showFilmDetails : ", film); // Affiche l'objet film complet
 
@@ -167,9 +171,12 @@ function showFilmDetails(film) {
                 const descriptionToDisplay = filmDetails.description || filmDetails.long_description || 'Aucune description disponible.';
                 console.log("Description récupérée : ", descriptionToDisplay); // Affiche la description dans la console
 
+                // Vérifier si l'URL de l'image est valide, sinon utiliser l'image par défaut
+                const imageUrl = filmDetails.image_url || '/frontend/assets/images/default-image.jpg.png';  // Image par défaut
+
                 filmDetailsContent.innerHTML = `
                     <h4>${filmDetails.title} (${filmDetails.year})</h4>
-                    <img src="${filmDetails.image_url}" class="img-fluid" alt="${filmDetails.title}">
+                    <img src="${imageUrl}" class="img-fluid" alt="${filmDetails.title}" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
                     <p><strong>Description :</strong> ${descriptionToDisplay}</p>
                     <p><strong>Note IMDb :</strong> ${filmDetails.imdb_score}</p>
                     <p><strong>Votes :</strong> ${filmDetails.votes}</p>
@@ -205,7 +212,6 @@ function showFilmDetails(film) {
 }
 
 
-// Fonction pour afficher les films les mieux notés (top 6)
 // Fonction pour afficher les films les mieux notés (6 films)
 function displayTopRatedFilms(films) {
     // Trier les films par note de manière décroissante (du mieux noté au moins bien noté)
@@ -223,11 +229,12 @@ function displayTopRatedFilms(films) {
             const film = topRatedFilms[i];
             const filmElement = document.createElement('div');
             filmElement.classList.add('film-item'); // Classe pour chaque film
+            const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';  // Image par défaut si l'URL est manquante ou invalide
 
             // Structure HTML pour chaque film avec overlay
             filmElement.innerHTML = `
                 <div class="film-image-container">
-                    <img src="${film.image_url}" class="d-block w-100" alt="${film.title}">
+                    <img src="${imageUrl}" class="d-block w-100" alt="${film.title}" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
                     <div class="overlay">
                         <h5>${film.title}</h5>
                         <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
@@ -266,6 +273,10 @@ function displayTopRatedFilms(films) {
 
 function displayFilmsInCarousel(genre, films) {
     const container = document.getElementById(`${genre}Films`);
+    if (!container) {
+        console.error(`Le conteneur pour le genre ${genre} n'a pas été trouvé.`);
+        return;
+    }
     container.innerHTML = '';
 
     if (!films || films.length === 0) {
@@ -275,7 +286,6 @@ function displayFilmsInCarousel(genre, films) {
 
     const filmsPerSlide = 6;
     const numSlides = Math.ceil(films.length / filmsPerSlide);
-
     const fragment = document.createDocumentFragment();
 
     for (let slideIndex = 0; slideIndex < numSlides; slideIndex++) {
@@ -291,13 +301,13 @@ function displayFilmsInCarousel(genre, films) {
         slideInnerContainer.classList.add('row');
 
         slideFilms.forEach(film => {
-            const imageUrl = film.image_url || 'https://placehold.co/100x200.png';
+            const imageUrls = film.image_url || '/frontend/assets/images/default-image.jpg.png' ;
             const filmElement = document.createElement('div');
             filmElement.classList.add('col-md-2');
 
             filmElement.innerHTML = `
                 <div class="film-image-container">
-                    <img src="${imageUrl}" class="d-block w-100" alt="${film.title}" onerror="this.src='default-image.jpg';">
+                    <img src="${imageUrls}" class="d-block w-100" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
                     <div class="overlay">
                         <h5>${film.title}</h5>
                         <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton" aria-label="Voir les détails du film ${film.title}">
@@ -334,6 +344,7 @@ function displayFilmsInCarousel(genre, films) {
 
 
 
+
 // Fonction pour initialiser le carrousel avec Bootstrap
 function initCarousel(genre) {
     const carouselElement = document.getElementById(`carouselExampleControls${capitalizeFirstLetter(genre)}`);
@@ -360,6 +371,17 @@ genresToDisplay.forEach(genre => {
 
 // Appeler la fonction pour récupérer les films généraux (si nécessaire)
 fetchData();
+
+
+
+
+
+
+
+
+
+
+
 
 
 
