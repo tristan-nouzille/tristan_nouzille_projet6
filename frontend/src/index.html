@@ -6,27 +6,43 @@
     
         <!-- Bootstrap CSS local -->
         <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
-    
+        <!-- CDN pour Bootstrap Icons -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
         <!-- Ton propre fichier CSS -->
         <link rel="stylesheet" href="../assets/css/styles.css">
-    
         <!-- Bootstrap JS local (avec bundle.min.js pour le JS de Bootstrap inclu) -->
         <script src="../assets/js/bootstrap.bundle.min.js"></script>
-    
         <!-- Ton script JS (en mode module) -->
         <script type="module" src="../assets/js/script.js" defer></script>
     </head>
-    
     <body>
         <section>
             <header class="banniere">
+                <!-- Bouton Menu -->
+                <button id="menuButton" class="menu-button">☰ Menu</button>
                 <img class="logo" src="https://user.oc-static.com/upload/2020/09/18/16004298163529_P5.png" alt="logo JustStreamIt">
                 <h1 id="titre">Vidéo à la demande</h1>
             </header>
         </section>
-        
 
         <main>
+            <!-- Barre de navigation -->
+            <nav id="sidebar" class="side-nav">
+               <div class="search-container">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher...">
+                    <button id="searchButton">
+                     <i class="bi bi-search"></i> <!-- Icône de loupe de Bootstrap Icons -->
+                    </button>
+                </div>
+                <!-- Catégories -->
+                <div class="categories-container">
+                    <h4>Catégorie :</h4>
+                    <div id="categoriesList">
+                        <!-- Les catégories de l'API seront injectées ici -->
+                    </div>
+                </div>
+            </nav>
+
             <section>
                 <h1 class="categorie">Le meilleur Film</h1>
                 <div id="topFilmContent"></div>
@@ -73,19 +89,9 @@
                 </div>
             </section> 
 
-            <section>
-                <h2>Autres catégorie :</h2>
-                <div class="dropdown show">
-                    <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                      Autres catégorie
-                    </a>
-                  
-                    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                      <a class="dropdown-item" href="#">Action</a>
-                      <a class="dropdown-item" href="#">Another action</a>
-                      <a class="dropdown-item" href="#">Something else here</a>
-                    </div>
-                  </div>
+            <section class="categorie">
+               <!--les films de la catégorie selectionné seront affiché ici.-->
+               <div id="categoryFilmsContainer" class="container2 film-image-container:hover img "></div>
             </section>
         </main> 
         <!-- Modale Bootstrap pour afficher les détails du film -->

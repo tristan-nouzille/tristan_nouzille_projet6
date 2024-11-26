@@ -31,12 +31,84 @@ async function fetchFilmsByGenre(genre) {
 
         // Afficher les films dans le carrousel
         displayFilmsInCarousel(genre, allFilms.slice(0, 18));
+        
 
     } catch (error) {
         console.error(`Erreur dans la récupération des films pour le genre "${genre}" :`, error);
     }
 }
 
+async function fetchCategories() {
+    const apiUrl = 'http://localhost:8000/api/v1/genres/';
+    let allCategories = [];
+    let nextPageUrl = apiUrl;
+
+    try {
+        while (nextPageUrl) {
+            const response = await fetch(nextPageUrl);
+            if (!response.ok) throw new Error(`Erreur HTTP : ${response.status}`);
+
+            const data = await response.json();
+            allCategories = allCategories.concat(data.results);
+            nextPageUrl = data.next;
+        }
+
+        const categoriesList = document.getElementById('categoriesList');
+        if (!categoriesList) {
+            console.error('Élément avec l\'ID "categoriesList" introuvable.');
+            return;
+        }
+
+        categoriesList.innerHTML = ''; // Vide la div avant d'ajouter les catégories
+
+        allCategories.forEach(genre => {
+            const p = document.createElement('p'); // Créer un <p> pour chaque catégorie
+            p.textContent = genre.name;
+            p.classList.add('category-item'); // Appliquer une classe CSS
+            p.addEventListener('click', () => {
+                console.log(`Genre sélectionné : ${genre.name}`);
+                handleCategorySelection(genre.name); // Appelle la fonction pour charger les films
+            });
+            categoriesList.appendChild(p);
+        });
+        displayFilmsByCategory();
+
+        console.log('Catégories affichées avec succès.');
+    } catch (error) {
+        console.error('Erreur lors de la récupération ou de l\'affichage des catégories :', error);
+    }
+}
+
+async function handleCategorySelection(genre) {
+    console.log(`Chargement des films pour la catégorie : ${genre}`);
+    try {
+        const films = await fetchFilmsByGenre(genre); // Récupère les films de ce genre
+        displayFilmsByCategory(films, genre); // Affiche les films
+    } catch (error) {
+        console.error(`Erreur lors du chargement des films pour la catégorie "${genre}" :`, error);
+    }
+}
+
+function toggleSidebar() {
+    const sidebar = document.getElementById("sidebar");
+    const mainContent = document.querySelector("main");
+
+    if (sidebar.style.width === "250px") {
+        sidebar.style.width = "0";
+        mainContent.style.marginLeft = "0";
+    } else {
+        sidebar.style.width = "250px";
+        mainContent.style.marginLeft = "250px";
+    }
+
+    fetchCategories();
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Maintenant le DOM est prêt à être manipulé.
+    fetchCategories();
+    document.getElementById("menuButton").addEventListener("click", toggleSidebar);
+});
 
 // Fonction pour récupérer tous les films (avec pagination)
 async function fetchData() {
@@ -151,8 +223,6 @@ async function displayTopFilm(film) {
     }
 }
 
-
-
 function showFilmDetails(film) {
     console.log("Film reçu dans showFilmDetails : ", film); // Affiche l'objet film complet
 
@@ -211,7 +281,6 @@ function showFilmDetails(film) {
     filmDetailsModal.show();
 }
 
-
 // Fonction pour afficher les films les mieux notés (6 films)
 function displayTopRatedFilms(films) {
     // Trier les films par note de manière décroissante (du mieux noté au moins bien noté)
@@ -268,8 +337,6 @@ function displayTopRatedFilms(films) {
         });
     });
 }
-
-
 
 function displayFilmsInCarousel(genre, films) {
     const container = document.getElementById(`${genre}Films`);
@@ -342,9 +409,6 @@ function displayFilmsInCarousel(genre, films) {
     initCarousel(genre);
 }
 
-
-
-
 // Fonction pour initialiser le carrousel avec Bootstrap
 function initCarousel(genre) {
     const carouselElement = document.getElementById(`carouselExampleControls${capitalizeFirstLetter(genre)}`);
@@ -369,8 +433,43 @@ genresToDisplay.forEach(genre => {
     fetchFilmsByGenre(genre);  // Récupérer les films pour chaque genre
 });
 
+function displayFilmsByCategory(films, genre) {
+    const categoryFilmsContainer = document.getElementById('categoryFilmsContainer');
+    if (!categoryFilmsContainer) {
+        console.error('Élément avec l\'ID "categoryFilmsContainer" introuvable.');
+        return;
+    }
+
+    categoryFilmsContainer.innerHTML = `<h3>Films de la catégorie : ${genre}</h3>`; // Titre de la catégorie
+
+    if (films.length === 0) {
+        categoryFilmsContainer.innerHTML += '<p>Aucun film trouvé pour cette catégorie.</p>';
+        return;
+    }
+
+    films.forEach(film => {
+        const filmCard = document.createElement('div');
+        filmCard.classList.add('film-card'); // Ajouter une classe pour le style
+        filmCard.innerHTML = `
+            <img src="${film.image_url || '/frontend/assets/images/default-image.jpg.png'}" 
+                 alt="${film.title}" 
+                 class="film-image" 
+                 onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
+            <h4>${film.title}</h4>
+            <p><strong>Note IMDb :</strong> ${film.imdb_score || 'N/A'}</p>
+        `;
+        filmCard.addEventListener('click', () => showFilmDetails(film)); // Afficher les détails du film
+        categoryFilmsContainer.appendChild(filmCard);
+    });
+}
+
 // Appeler la fonction pour récupérer les films généraux (si nécessaire)
 fetchData();
+
+
+
+
+
 
 
 

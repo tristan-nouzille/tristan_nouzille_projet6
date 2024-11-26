@@ -20,6 +20,25 @@ p, h1, h2, h3, a{
      /* Assure que la bannière reste au-dessus des autres éléments */
 }
 
+/* Bouton Menu */
+.menu-button {
+    position: absolute;
+    left: 4%;  /* Laisser de l'espace à gauche */
+    top: 50%;
+    transform: translateY(-50%);  /* Centrer verticalement */
+    background-color: transparent;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 24px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+/* Modifier l'apparence du bouton au survol */
+.menu-button:hover {
+    color: #ccc;  /* Couleur du texte lorsqu'on survole */
+}
+
 .logo {
     width: 120px; /* Largeur de l'image */
     height: auto; /* Garde le ratio de l'image */
@@ -32,39 +51,94 @@ p, h1, h2, h3, a{
     text-align: center;
 }
 
+/* Barre de navigation */
+/* Par défaut, la barre latérale est cachée et elle ne prend pas toute la hauteur de l'écran */
+.side-nav {
+    width: 0;
+    height: 100%;  /* Prend toute la hauteur de la section main, pas de l'entête */
+    position: absolute;  /* Permet à la barre latérale de se déplacer sans affecter l'entête */
+    top: 100px;
+    left: 0;
+    background-color: rgb(27, 25, 25);
+    overflow-x: hidden;
+    transition: 0.1s;
+    padding-top: 10px;  /* Évite que la barre latérale chevauche l'entête */
+    z-index: 1; /* Permet au contenu de la page d'être visible au-dessus de la barre latérale */
+    display: block !important;
+}
+
+/* Style pour la barre de recherche */
+.search-container {
+    display: flex;
+    justify-content: center;
+}
+
+/* Style de la barre de recherche */
+/* Style de la barre de recherche */
+#searchInput {
+    width: 80%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #fff;  /* Bordure blanche pour un contraste */
+    background-color: transparent; /* Fond transparent */
+    color: white;  /* Texte blanc */
+    font-size: 10px;  /* Ajustez la taille du texte si nécessaire */
+}
+
+/* Style du bouton de recherche (loupe) */
+#searchButton {
+    background-color: transparent; /* Pas de fond */
+    border: none;  /* Pas de bordure */
+    color: white;  /* Loupe blanche */
+    font-size: 18px;  /* Taille de la loupe */
+    cursor: pointer;
+}
+
+/* Lorsque le bouton de recherche est survolé */
+#searchButton:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Un léger fond lorsqu'on survole */
+    border-radius: 4px;  /* Coins arrondis au survol */
+}
+
+/* Style pour la section des catégories */
+.categories-container {
+    margin-top: 10px;
+    padding-left: 15px; /* Ajoute un peu d'espace à gauche */
+    color: white;  /* Couleur du titre */
+}
+
+
+/* Style pour la liste des catégories */
+#categoriesList {
+    padding-left: 0;
+    margin-top: 0;
+    list-style-type: none;  /* Enlève les puces des éléments de la liste */
+}
+
+/* Style pour chaque élément de catégorie */
+.category-item {
+    padding: 0px;
+    margin: 5px 0;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    text-align: center;
+}
+h4{
+    text-align: center;
+}
+/* Effet au survol pour chaque élément */
+.category-item:hover {
+    background-color: #555;  /* Changer la couleur de fond au survol */
+}
+
 section{
 
     margin: 50px 0;
     padding: 10px;
     display: block;
 }
-#categoriesIcon {
-    position: absolute; /* Positionner l'icône dans la bannière */
-    left: 20px; /* Aligner l'icône sur la gauche */
-    top: 50%; /* Centrer verticalement */
-    transform: translateY(-50%); /* Ajuster pour le centrer parfaitement */
-    font-size: 24px; /* Taille de l'icône */
-    background-color: transparent; /* Supprimer l'arrière-plan */
-    border: none; /* Supprimer les bordures */
-    color: white; /* Assortir la couleur à celle du texte du titre */
-    cursor: pointer; /* Ajouter un pointeur survolant */
-    z-index: 1100; /* Assure que l'icône est au-dessus des autres éléments */
-}
-
-#categoriesIcon i {
-    font-size: inherit; /* Appliquer la taille de l'icône au conteneur */
-    vertical-align: middle; /* Centrer l'icône dans le bouton */
-}
-
-.categories-nav {
-    transition: transform 0.3s ease; /* Ajoute une animation pour afficher/masquer la barre */
-    transform: translateX(100%); /* Par défaut, cache la barre en dehors de l'écran */
-}
-
-.categories-nav.active {
-    transform: translateX(0); /* Affiche la barre lorsqu'elle est active */
-}
-
 
 .cadre {
     display: flex; /* Affiche les colonnes de manière horizontale */
