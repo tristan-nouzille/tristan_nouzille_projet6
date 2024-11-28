@@ -115,7 +115,7 @@ function createGenreSection(genre) {
     // Créer le conteneur pour les films de ce genre
     const filmsContainer = document.createElement('div');
     filmsContainer.id = `${genre.name}Films`; // ID unique pour chaque genre
-    filmsContainer.classList.add('film-image-container');
+    filmsContainer.classList.add('carousel', 'slide', 'pointer-event');
     section.appendChild(filmsContainer);
 
     // Ajouter la section à la page (dans la balise main)
@@ -468,10 +468,8 @@ function displayFilmsInCarousel(genre, films) {
     // Appliquer un style pour s'assurer que le bouton reste en bas
     container.style.position = 'relative';
 
-       // Vérifier la largeur de l'écran pour déterminer le nombre d'images par slide
-    const isSmartphone = window.innerWidth <= 768; // Smartphone
-    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024; // Tablette
-    const filmsPerSlide = isSmartphone ? 3 : isTablet ? 4 : 6; // 3 pour smartphone, 4 pour tablette, 6 pour bureau
+    // Vérifier si l'écran est un smartphone
+    const isSmartphone = window.innerWidth <= 768;
 
     if (isSmartphone) {
 
