@@ -2,6 +2,7 @@
 <html lang="fr">
     <head>
         <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Balise viewport ici -->
         <title>JustStreamIt</title>
     
         <!-- Bootstrap CSS local -->
@@ -51,6 +52,7 @@
             <section class="categorie">
                 <h1><strong>Les mieux notés</strong></h1>
                 <div id="ratedFilms" class="container2 film-image-container:hover img "></div> <!-- Les films les mieux notés seront affichés ici -->
+                
             </section>
             
 
@@ -87,12 +89,16 @@
                         <span class="sr-only"></span>
                     </a>
                 </div>
-            </section> 
 
-            <section class="categorie">
-               <!--les films de la catégorie selectionné seront affiché ici.-->
-               <div id="categoryFilmsContainer" class="container2 film-image-container:hover img "></div>
-            </section>
+                 <!-- Liste d'images pour les petits écrans -->
+                <div class="film-container d-block d-md-none">
+                <div id="horrorFilmsList" class="film-image-container">
+                <!-- Les films seront injectés ici via JS -->
+                </div>
+                    <button type="button" class="btn btn-primary btn-lg btn-block" onclick="loadMoreFilms('horror')">Voir plus</button>
+                </div>
+            </section> 
+            
         </main> 
         <!-- Modale Bootstrap pour afficher les détails du film -->
         <div class="modal fade" id="filmDetailsModal" tabindex="-1" aria-labelledby="filmDetailsModalLabel" aria-hidden="true">

@@ -148,6 +148,8 @@ section{
     width: 70%;
     padding: 20px;
     position: relative;
+    box-sizing: border-box; /* Inclut les paddings et bordures dans la largeur totale */
+    overflow: hidden; /* Empêche le débordement du contenu */
 }
 
 p{
@@ -386,14 +388,28 @@ ul li a {
     text-decoration: none;
     color: #ddd;
 }
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
 
+/* Le footer est positionné de manière fixe en bas de la page */
 footer {
+    width: 100%;
     background-color: #61787F;
-    color: white; /* Optionnel : texte en blanc pour le contraste */
-    padding: 20px; /* Optionnel : ajoute de l'espace autour du contenu */
-    text-align: center; /* Optionnel : centre le texte */
-    
-
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    z-index: 100; /* Assure que le footer soit au-dessus des autres éléments */
+}
+  
+/* Si tu veux que le contenu principal ne soit pas caché sous le footer */
+main {
+    flex-grow: 1; /* Cela permet à l'élément main de prendre tout l'espace disponible */
+    padding-bottom: 60px; /* On donne un padding égal à la hauteur du footer pour ne pas que le contenu soit caché */
 }
 
 
@@ -442,28 +458,15 @@ footer {
          /* Assure que la bannière reste au-dessus des autres éléments */
     }
 }
-
-@media (max-width: 940px) {
-    .text-col h2 {
-        font-size: 2em; /* Taille de police encore plus petite pour les très petits écrans */
-    }
-
-    .text-col p {
-        font-size: 1em; /* Réduire encore la taille du texte */
-    }
+/* Mobile Styles */
+@media screen and (max-width: 480px) {
     .banniere {
-        background-color: #61787F;
-        height: 100px; /* Fixe une hauteur pour la bannière */
-        display: flex; /* Utilise flexbox pour aligner le logo et le texte */
-        flex-direction: column;
-        align-items: center; /* Centre verticalement les éléments */
-        justify-content: center; /* Sépare les éléments de manière égale */
-        padding: 0 50px; /* Ajoute un espace intérieur à gauche et à droite */
-        position: absolute; /* Fixe la bannière en haut de la page */
-        width: 100%; /* Fait en sorte que la bannière occupe toute la largeur de l'écran */
-        top: 0; /* Place la bannière en haut */
+        height: 80px;
+    }
 
-         /* Assure que la bannière reste au-dessus des autres éléments */
+    .menu-button {
+        font-size: 16px;
+        padding: 8px 12px;
     }
     .btn-danger {
         width: 90%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
@@ -471,8 +474,69 @@ footer {
         font-size: 14px; /* Réduire la taille de police sur les petits écrans */
         position: relative;
         top: 220px;
-        left: 200px;
+        left: 150px;
 
+    }
+
+    .logo {
+        width: 100px;
+    }
+
+    #titre {
+        font-size: 20px;
+    }
+
+    .search-container {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    #searchInput {
+        width: 100%;
+        font-size: 12px;
+    }
+
+    .text-col {
+        font-size: 20px;
+    }
+
+    .text-col-p {
+        font-size: 18px;
+    }
+
+    .cadre {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .categories-container {
+        padding-left: 10px;
+    }
+
+    .carousel-inner {
+        display: none; /* Cache le carousel sur les petits écrans */
+    }
+
+    .carousel-control-prev,
+    .carousel-control-next {
+        display: none; /* Cache les contrôles du carousel */
+    }
+
+    /* Affichage alternatif des éléments du carousel */
+    .film-image-container {
+        display: flex; /* Affiche les images sous forme de liste verticale */
+        flex-direction: column;
+        gap: 10px; /* Espacement entre les images */
+    }
+
+    .film-image-container img {
+        width: 100%; /* Les images occupent toute la largeur */
+        height: auto; /* Conserve les proportions */
+        border-radius: 8px; /* Coins arrondis pour un aspect moderne */
+    }
+
+    .overlay {
+        display: none; /* Désactive l'effet hover sur les smartphones */
     }
 
 }
