@@ -185,7 +185,7 @@ p{
    align-items: start;
 }
 
-.btn-danger {
+.btn-dangerD {
     background-color: red;
     color: white;
     border-radius: 50px;
@@ -435,7 +435,7 @@ main {
         margin-left: 5%; /* Ajuster la marge pour les petits écrans */
     }
 
-    .btn-danger {
+    .btn-dangerD {
         width: 90%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
         height: 50px; /* Ajuster la hauteur si nécessaire pour les écrans plus petits */
         font-size: 14px; /* Réduire la taille de police sur les petits écrans */
@@ -468,7 +468,7 @@ main {
         font-size: 16px;
         padding: 8px 12px;
     }
-    .btn-danger {
+    .btn-dangerD {
         width: 90%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
         height: 50px; /* Ajuster la hauteur si nécessaire pour les écrans plus petits */
         font-size: 14px; /* Réduire la taille de police sur les petits écrans */
@@ -497,11 +497,12 @@ main {
     }
 
     .text-col {
-        font-size: 20px;
+        font-size: 10px;
     }
 
     .text-col-p {
-        font-size: 18px;
+        font-size: 15px;
+        text-align: center;
     }
 
     .cadre {
@@ -513,30 +514,47 @@ main {
         padding-left: 10px;
     }
 
-    .carousel-inner {
-        display: none; /* Cache le carousel sur les petits écrans */
-    }
-
-    .carousel-control-prev,
-    .carousel-control-next {
-        display: none; /* Cache les contrôles du carousel */
-    }
-
     /* Affichage alternatif des éléments du carousel */
+    .film-item img {
+        width: 70%;
+        height: auto;
+        border-radius: 8px;
+    }
+    
     .film-image-container {
-        display: flex; /* Affiche les images sous forme de liste verticale */
+        position: relative;
+        text-align: center;
+    }
+    
+    .film-item {
+        display: flex;
         flex-direction: column;
-        gap: 10px; /* Espacement entre les images */
+        align-items: center;
     }
-
+    
+    .btn-block {
+        width: 100%;
+    }
+    
+    .overlay h5 {
+        font-size: 1.2rem;
+        margin: 10px 0;
+    }
+    .transition-transform {
+        transition: transform 0.5s ease-in-out;
+    }
+    #ratedFilms {
+        display: flex;
+        flex-direction: column; /* Aligner les éléments verticalement */
+        align-items: center;    /* Centrer les éléments horizontalement */
+    }
+    
     .film-image-container img {
-        width: 100%; /* Les images occupent toute la largeur */
-        height: auto; /* Conserve les proportions */
-        border-radius: 8px; /* Coins arrondis pour un aspect moderne */
-    }
-
-    .overlay {
-        display: none; /* Désactive l'effet hover sur les smartphones */
+        max-width: 300px; /* Ajuster la largeur maximale de l'image */
+        height: auto;     /* Préserver les proportions */
+        border-radius: 10px; /* Optionnel : arrondir les coins */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Optionnel : ajouter une ombre */
+        align-items: center;
     }
 
 }

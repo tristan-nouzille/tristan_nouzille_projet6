@@ -115,7 +115,7 @@ function createGenreSection(genre) {
     // Créer le conteneur pour les films de ce genre
     const filmsContainer = document.createElement('div');
     filmsContainer.id = `${genre.name}Films`; // ID unique pour chaque genre
-    filmsContainer.classList.add('container2', 'film-image-container');
+    filmsContainer.classList.add('film-image-container');
     section.appendChild(filmsContainer);
 
     // Ajouter la section à la page (dans la balise main)
@@ -253,7 +253,7 @@ async function displayTopFilm(film) {
                     <p><strong>Description :</strong> ${descriptionToDisplay}</p>
                 </div>
                 <div>
-                    <button id="detailsButton${film.id}" class="btn-danger">Détails</button>
+                    <button id="detailsButton${film.id}" class="btn-dangerD">Détails</button>
                 </div>
             </div>
         `;
@@ -339,49 +339,107 @@ function displayTopRatedFilms(films) {
     // Vider l'élément avant d'ajouter de nouveaux films
     ratedFilms.innerHTML = '';
 
-    // Afficher les 6 premiers films dans l'élément
-    for (let i = 0; i < 6; i++) {
-        if (topRatedFilms[i]) { // Vérifie que l'index existe
-            const film = topRatedFilms[i];
-            const filmElement = document.createElement('div');
-            filmElement.classList.add('film-item'); // Classe pour chaque film
-            const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';  // Image par défaut si l'URL est manquante ou invalide
+    // Vérifier si l'écran est un smartphone (largeur maximale de 768px)
+    const isSmartphone = window.innerWidth <= 768;
 
-            // Structure HTML pour chaque film avec overlay
-            filmElement.innerHTML = `
-                <div class="film-image-container">
-                    <img src="${imageUrl}" class="d-block w-100" alt="${film.title}" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
-                    <div class="overlay">
-                        <h5>${film.title}</h5>
-                        <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
+    // Créer le bouton "Voir plus" une seule fois
+    const voirPlusButton = document.createElement('button');
+    voirPlusButton.classList.add('btn', 'btn-danger', 'btn-block', 'mt-3');
+    voirPlusButton.textContent = 'Voir plus';
+
+    // Ajouter le bouton "Voir plus" au conteneur principal
+    ratedFilms.appendChild(voirPlusButton);
+
+    // Gestion des affichages selon le type d'écran
+    if (isSmartphone) {
+        // --- Affichage pour les smartphones ---
+        const maxVisibleFilms = 1; // Nombre de films affichés à la fois
+        let currentVisibleCount = 0;
+
+        // Fonction pour afficher les films un par un
+        const renderFilms = () => {
+            const filmsToDisplay = topRatedFilms.slice(currentVisibleCount, currentVisibleCount + maxVisibleFilms);
+
+            // Ajouter les films sélectionnés au DOM
+            filmsToDisplay.forEach(film => {
+                const filmElement = document.createElement('div');
+                filmElement.classList.add('film-item', 'mb-3');
+                const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';
+
+                filmElement.innerHTML = `
+                    <div class="film-image-container">
+                        <img src="${imageUrl}" class="d-block w-100" alt="${film.title}" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
+                        <div class="overlay">
+                            <h5>${film.title}</h5>
+                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
+                        </div>
                     </div>
-                </div>
-            `;
+                `;
+                ratedFilms.insertBefore(filmElement, voirPlusButton); // Ajouter avant le bouton "Voir plus"
+            });
 
-            // Ajouter l'élément film à la section
-            ratedFilms.appendChild(filmElement);
+            currentVisibleCount += maxVisibleFilms;
+
+            // Masquer le bouton "Voir plus" si tous les films sont affichés
+            if (currentVisibleCount >= topRatedFilms.length) {
+                voirPlusButton.style.display = 'none';
+            }
+
+            // --- Défilement vers le bas ---
+            ratedFilms.scrollTop = ratedFilms.scrollHeight; // Défile vers le bas du conteneur
+        };
+
+        // Initialiser l'affichage
+        renderFilms();
+
+        // Ajouter un événement au bouton "Voir plus"
+        voirPlusButton.addEventListener('click', renderFilms);
+
+    } else {
+        // --- Affichage pour les écrans larges ---
+        const maxVisibleFilms = 6; // Limiter à 6 films maximum
+
+        for (let i = 0; i < maxVisibleFilms; i++) {
+            if (topRatedFilms[i]) { // Vérifier si le film existe
+                const film = topRatedFilms[i];
+                const filmElement = document.createElement('div');
+                filmElement.classList.add('film-item', 'mb-3');
+                const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';
+
+                filmElement.innerHTML = `
+                    <div class="film-image-container">
+                        <img src="${imageUrl}" class="d-block w-100" alt="${film.title}" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
+                        <div class="overlay">
+                            <h5>${film.title}</h5>
+                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
+                        </div>
+                    </div>
+                `;
+                ratedFilms.insertBefore(filmElement, voirPlusButton); // Ajouter avant le bouton "Voir plus"
+            }
         }
+
+        // Masquer le bouton pour les écrans larges (si tous les films sont déjà affichés)
+        voirPlusButton.style.display = 'none';
+
+        // --- Défilement vers le bas ---
+        ratedFilms.scrollTop = ratedFilms.scrollHeight; // Défiler vers le bas pour 6 films affichés
     }
 
-    // Attacher l'eventListener au bouton "Détails" après que tous les films aient été ajoutés au DOM
-    const detailButtons = ratedFilms.querySelectorAll('.detailsButton');
-    detailButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            // Récupérer l'ID du film depuis l'attribut 'data-film-id'
-            const filmId = button.getAttribute('data-film-id');
-            console.log('Film ID cliqué :', filmId); // Vérifiez l'ID récupéré dans la console
+    // Gérer les boutons "Détails" (valable pour les deux cas)
+    ratedFilms.addEventListener('click', function (event) {
+        if (event.target.classList.contains('detailsButton')) {
+            const filmId = event.target.getAttribute('data-film-id');
+            console.log('Film ID cliqué :', filmId);
 
-            // Trouver le film correspondant à cet ID
-            const film = topRatedFilms.find(f => f.id.toString() === filmId);  // Assurez-vous que la comparaison est correcte
+            const film = topRatedFilms.find(f => f.id.toString() === filmId);
 
             if (film) {
-                // Si le film existe, afficher les détails
                 showFilmDetails(film);
             } else {
-                // Si le film est introuvable
                 console.error('Film introuvable avec l\'ID', filmId);
             }
-        });
+        }
     });
 }
 
@@ -392,6 +450,8 @@ function displayFilmsInCarousel(genre, films) {
         console.error(`Le conteneur pour le genre ${genre} n'a pas été trouvé.`);
         return;
     }
+
+    // Réinitialisation du conteneur
     container.innerHTML = '';
 
     if (!films || films.length === 0) {
@@ -399,47 +459,119 @@ function displayFilmsInCarousel(genre, films) {
         return;
     }
 
-    const filmsPerSlide = 6;
-    const numSlides = Math.ceil(films.length / filmsPerSlide);
-    const fragment = document.createDocumentFragment();
+    // Créer le bouton "Voir plus" et ajouter les classes Bootstrap
+    const voirPlusButton = document.createElement('button');
+    voirPlusButton.classList.add('btn', 'btn-danger', 'btn-block', 'mt-3');
+    voirPlusButton.textContent = 'Voir plus';
+    container.appendChild(voirPlusButton); // Ajouter le bouton après les films
 
-    for (let slideIndex = 0; slideIndex < numSlides; slideIndex++) {
-        const slideFilms = films.slice(slideIndex * filmsPerSlide, (slideIndex + 1) * filmsPerSlide);
+    // Appliquer un style pour s'assurer que le bouton reste en bas
+    container.style.position = 'relative';
 
-        const slideElement = document.createElement('div');
-        slideElement.classList.add('carousel-item');
-        if (slideIndex === 0) {
-            slideElement.classList.add('active');
-        }
+       // Vérifier la largeur de l'écran pour déterminer le nombre d'images par slide
+    const isSmartphone = window.innerWidth <= 768; // Smartphone
+    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024; // Tablette
+    const filmsPerSlide = isSmartphone ? 3 : isTablet ? 4 : 6; // 3 pour smartphone, 4 pour tablette, 6 pour bureau
 
-        const slideInnerContainer = document.createElement('div');
-        slideInnerContainer.classList.add('row');
+    if (isSmartphone) {
 
-        slideFilms.forEach(film => {
-            const imageUrls = film.image_url || '/frontend/assets/images/default-image.jpg.png' ;
-            const filmElement = document.createElement('div');
-            filmElement.classList.add('col-md-2');
+        const carouselIcons = document.querySelectorAll(
+            `.carousel-control-prev, .carousel-control-next, .carousel-indicators`
+        );
+        carouselIcons.forEach(icon => icon.remove());
+        const maxVisibleFilms = 3; // Nombre maximum de films visibles à la fois
+        let currentVisibleCount = 0;
 
-            filmElement.innerHTML = `
-                <div class="film-image-container">
-                    <img src="${imageUrls}" class="d-block w-100" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
-                    <div class="overlay">
-                        <h5>${film.title}</h5>
-                        <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton" aria-label="Voir les détails du film ${film.title}">
-                            Détails
-                        </button>
+        // Fonction pour afficher les films
+        const renderFilms = () => {
+            const fragment = document.createDocumentFragment();
+            const filmsToDisplay = films.slice(currentVisibleCount, currentVisibleCount + maxVisibleFilms);
+
+            filmsToDisplay.forEach(film => {
+                const filmElement = document.createElement('div');
+                filmElement.classList.add('film-item', 'mb-3');
+                const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';
+
+                filmElement.innerHTML = `
+                    <div class="film-image-container">
+                        <img src="${imageUrl}" class="img-fluid" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
+                        <div class="overlay">
+                            <h5>${film.title}</h5>
+                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton" aria-label="Voir les détails du film ${film.title}">
+                                Détails
+                            </button>
+                        </div>
                     </div>
-                </div>
-            `;
-            slideInnerContainer.appendChild(filmElement);
+                `;
+                fragment.appendChild(filmElement);
+            });
+
+            // Ajouter les films affichés au conteneur
+            container.insertBefore(fragment, voirPlusButton); // Ajouter les films avant le bouton "Voir plus"
+            currentVisibleCount += filmsToDisplay.length;
+
+            // Gérer l'affichage du bouton "Voir plus"
+            if (currentVisibleCount >= films.length) {
+                voirPlusButton.style.display = 'none'; // Masquer le bouton quand tous les films sont affichés
+            }
+
+            // Faire défiler vers le bas si des films ont été ajoutés
+            container.scrollTop = container.scrollHeight;
+        };
+
+        // Ajouter un événement au bouton "Voir plus"
+        voirPlusButton.addEventListener('click', function () {
+            renderFilms();
         });
 
-        slideElement.appendChild(slideInnerContainer);
-        fragment.appendChild(slideElement);
+        // Afficher les premiers films au départ
+        renderFilms();
+
+    } else {
+        // Mode bureau : affichage en carrousel
+        const filmsPerSlide = 6; // Nombre de films par slide
+        const numSlides = Math.ceil(films.length / filmsPerSlide);
+        const fragment = document.createDocumentFragment();
+
+        for (let slideIndex = 0; slideIndex < numSlides; slideIndex++) {
+            const slideFilms = films.slice(slideIndex * filmsPerSlide, (slideIndex + 1) * filmsPerSlide);
+
+            const slideElement = document.createElement('div');
+            slideElement.classList.add('carousel-item');
+            if (slideIndex === 0) {
+                slideElement.classList.add('active');
+            }
+
+            const slideInnerContainer = document.createElement('div');
+            slideInnerContainer.classList.add('row');
+
+            slideFilms.forEach(film => {
+                const imageUrls = film.image_url || '/frontend/assets/images/default-image.jpg.png';
+                const filmElement = document.createElement('div');
+                filmElement.classList.add('col-md-2');
+
+                filmElement.innerHTML = `
+                    <div class="film-image-container">
+                        <img src="${imageUrls}" class="d-block w-100" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
+                        <div class="overlay">
+                            <h5>${film.title}</h5>
+                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton" aria-label="Voir les détails du film ${film.title}">
+                                Détails
+                            </button>
+                        </div>
+                    </div>
+                `;
+                slideInnerContainer.appendChild(filmElement);
+            });
+
+            slideElement.appendChild(slideInnerContainer);
+            fragment.appendChild(slideElement);
+        }
+
+        container.appendChild(fragment);
     }
 
-    container.appendChild(fragment);
-
+    // Ajouter les événements pour les boutons "Détails"
     const detailButtons = container.querySelectorAll('.detailsButton');
     detailButtons.forEach(button => {
         button.addEventListener('click', function () {
@@ -467,9 +599,11 @@ function displayFilmsInCarousel(genre, films) {
 
         // Ajouter une image de film et le titre
         filmItem.innerHTML = `
-            <img src="${film.image_url || '/path/to/default-image.jpg'}" class="d-block w-100" alt="${film.title}">
-            <div class="carousel-caption d-none d-md-block">
-                <h5>${film.title}</h5>
+            <div class="film-image-container">
+                <img src="${film.image_url || '/path/to/default-image.jpg'}" class="d-block w-100" alt="${film.title}">
+                <div class="carousel-caption d-none d-md-block">
+                    <h5>${film.title}</h5>
+                </div>
             </div>
         `;
 
