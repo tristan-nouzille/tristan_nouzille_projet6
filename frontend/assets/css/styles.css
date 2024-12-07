@@ -1,10 +1,10 @@
 body{
     margin: 0;
-    background-color: rgb(27, 25, 25);
+    background-color: rgb(27, 25, 25) !important;
 }
 
 p, h1, h2, h3, a{
-    color: aliceblue;
+    color: aliceblue !important;
 }
 
 .banniere {
@@ -216,7 +216,7 @@ p{
                   /* Espace de 20px entre les images */
 }
 
-.film-item img {
+.film-item img, [src='/frontend/assets/images/default-image.jpg.png'] {
     width: 200px;  /* Taille des images */
     height: auto;   /* Garder les proportions de l'image */
     border-radius: 8px; /* Pour donner un effet arrondi */
@@ -403,9 +403,8 @@ footer {
     color: white;
     text-align: center;
     padding: 10px 0;
-    z-index: 100; /* Assure que le footer soit au-dessus des autres éléments */
 }
-  
+ 
 /* Si tu veux que le contenu principal ne soit pas caché sous le footer */
 main {
     flex-grow: 1; /* Cela permet à l'élément main de prendre tout l'espace disponible */

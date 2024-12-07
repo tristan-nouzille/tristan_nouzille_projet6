@@ -1,143 +1,12 @@
 const apiUrlFilms = 'http://localhost:8000/api/v1/titles/';  // L'URL de l'API pour les films
 const apiUrlFilmsByGenre = 'http://localhost:8000/api/v1/titles/?genre=';  // URL pour récupérer les films par genre
+const currentPage = window.location.pathname; // Utilisation de window.location.pathname
 
-// Liste des genres à afficher dans le carrousel
+
 const genresToDisplay = ['biography', 'horror'];
+fetchAndDisplayGenres(genresToDisplay);
 
-// Fonction pour récupérer les films par genre avec gestion de la pagination
-async function fetchFilmsByGenre(genre) {
-    const apiUrl = `${apiUrlFilmsByGenre}${genre}`;
-    let allFilms = [];
-    let nextPageUrl = apiUrl;
-
-    try {
-        while (nextPageUrl && allFilms.length < 18) {
-            const response = await fetch(nextPageUrl);
-            
-            // Vérification de la réponse de l'API
-            if (!response.ok) {
-                throw new Error(`Erreur de récupération des films pour "${genre}", code: ${response.status}`);
-            }
-
-            const data = await response.json();
-
-            // Vérification si les résultats sont bien présents dans la réponse
-            if (!data.results) {
-                throw new Error(`Pas de films trouvés pour "${genre}" dans la réponse de l'API.`);
-            }
-
-            console.log("Données API pour le genre:", genre, data); // Pour débogage
-
-            const films = Array.isArray(data.results) ? data.results : [];
-            allFilms = allFilms.concat(films);
-
-            // Affichage des films avec leur description
-            films.forEach(film => {
-                console.log(`Film: ${film.title}, Description: ${film.description || 'Aucune description disponible.'}`);
-            });
-
-            // Mise à jour de l'URL pour la page suivante
-            nextPageUrl = data.next;
-
-            // Limiter le nombre de films récupérés à 18
-            if (allFilms.length >= 18) {
-                allFilms = allFilms.slice(0, 18); // Couper les films excédentaires
-                break;
-            }
-        }
-
-        // Afficher les films dans le carrousel (ou autre méthode d'affichage)
-        displayFilmsInCarousel(genre, allFilms);
-    } catch (error) {
-        console.error(`Erreur dans la récupération des films pour le genre "${genre}" :`, error);
-        // Retourner un tableau vide en cas d'erreur
-        return [];
-    }
-}
-
-// Liste des genres affichés dans le menu
-async function fetchCategories() {
-    const apiUrl = 'http://localhost:8000/api/v1/genres/';
-    let allCategories = [];
-    let nextPageUrl = apiUrl;
-
-    try {
-        while (nextPageUrl) {
-            const response = await fetch(nextPageUrl);
-            if (!response.ok) throw new Error(`Erreur HTTP : ${response.status}`);
-
-            const data = await response.json();
-            allCategories = allCategories.concat(data.results);
-            nextPageUrl = data.next;
-        }
-
-        const categoriesList = document.getElementById('categoriesList');
-        categoriesList.innerHTML = ''; // Vider la liste avant de rajouter les catégories
-
-        // Parcourir toutes les catégories
-        allCategories.forEach(genre => {
-            // Créer un élément de liste pour chaque genre
-            const p = document.createElement('p');
-            p.textContent = genre.name;
-            p.classList.add('category-item');
-
-            // Ajouter un événement de clic pour chaque catégorie
-            p.addEventListener('click', () => {
-                // Créer dynamiquement la section pour le genre sélectionné
-                createGenreSection(genre);
-                fetchFilmsByGenre(genre.name); // Charger les films associés à ce genre
-            });
-
-            // Ajouter la catégorie à la liste
-            categoriesList.appendChild(p);
-        });
-    } catch (error) {
-        console.error('Erreur lors de la récupération des catégories :', error);
-    }
-}
-
-// Fonction pour créer la section avec le titre et le conteneur de films pour un genre sélectionné
-function createGenreSection(genre) {
-    // Vérifier si la section pour ce genre existe déjà
-    const existingSection = document.getElementById(`${genre.name}Section`);
-    if (existingSection) return; // Si la section existe déjà, ne rien faire
-
-    // Créer la section entière
-    const section = document.createElement('section');
-    section.classList.add('categorie');
-    section.id = `${genre.name}Section`; // ID unique pour chaque genre
-
-    // Créer le titre pour le genre
-    const title = document.createElement('h2');
-    title.textContent = genre.name;
-    section.appendChild(title);
-
-    // Créer le conteneur pour les films de ce genre
-    const filmsContainer = document.createElement('div');
-    filmsContainer.id = `${genre.name}Films`; // ID unique pour chaque genre
-    filmsContainer.classList.add('carousel', 'slide', 'pointer-event');
-    section.appendChild(filmsContainer);
-
-    // Ajouter la section à la page (dans la balise main)
-    const mainContainer = document.querySelector('main');
-    mainContainer.appendChild(section);
-}
-
-document.addEventListener('DOMContentLoaded', fetchCategories);  // Lancer la récupération des genres lorsque le DOM est chargé
-
-async function handleCategorySelection(genre) {
-    console.log('Genre sélectionné:', genre);
-
-    const films = await fetchData(genre);
-
-    if (films && films.length > 0) {
-        displayFilmsInCarousel(films, genre);
-    } else {
-        console.log(`Aucun film trouvé pour le genre "${genre}".`);
-    }
-}
-
-function toggleSidebar() {
+export function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
     const mainContent = document.querySelector("main");
 
@@ -149,17 +18,158 @@ function toggleSidebar() {
         mainContent.style.marginLeft = "250px";
     }
 
-    fetchCategories();
+    fetchAllCategories();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     // Maintenant le DOM est prêt à être manipulé.
-    fetchCategories();
+    fetchAllCategories();
     document.getElementById("menuButton").addEventListener("click", toggleSidebar);
 });
 
+export async function fetchAllCategories() {
+    const allCategories = []; // Toujours initialiser la liste des catégories
+    const apiUrl = 'http://localhost:8000/api/v1/genres/';
+    let nextPageUrl = apiUrl;
+
+    try {
+        // Charger les données paginées
+        while (nextPageUrl) {
+            const response = await fetch(nextPageUrl);
+            if (!response.ok) throw new Error(`Erreur HTTP : ${response.status}`);
+
+            const data = await response.json();
+
+            // Vérifier si "results" existe et est un tableau
+            if (data.results && Array.isArray(data.results)) {
+                allCategories.push(...data.results); // Ajouter les catégories à la liste
+            } else {
+                console.warn("La réponse de l'API ne contient pas de 'results' ou n'est pas un tableau.");
+            }
+
+            nextPageUrl = data.next; // Passer à la page suivante, ou null si terminée
+        }
+
+        const categoriesList = document.getElementById('categoriesList');
+        if (categoriesList) {
+            categoriesList.innerHTML = ''; // Nettoyer la liste avant de la remplir
+
+            // Vérifier si des catégories sont disponibles
+            if (allCategories.length === 0) {
+                categoriesList.innerHTML = '<p>Aucune catégorie trouvée.</p>';
+            } else {
+                // Parcourir et afficher les catégories
+                allCategories.forEach(genre => {
+                    const p = document.createElement('p');
+                    p.textContent = genre.name;
+                    p.classList.add('category-item');
+
+                    p.addEventListener('click', () => {
+                        console.log(`Catégorie sélectionnée : ${genre.name}`);
+                        handleCategorySelection(genre);
+                    });
+
+                    categoriesList.appendChild(p);
+                });
+            }
+        } else {
+            console.error('Élément "categoriesList" non trouvé dans le DOM.');
+        }
+    } catch (error) {
+        console.error('Erreur lors de la récupération des catégories :', error);
+    }
+}
+
+// Fonction pour récupérer les films par genre avec gestion de la pagination
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("Initialisation de la page...");
+    
+    // Charger et afficher les catégories dans le menu
+    await fetchAllCategories();
+
+});
+
+// Gestion de la redirection lorsque l'utilisateur clique sur une catégorie
+export function handleCategorySelection(genre) {
+    const genreName = encodeURIComponent(genre.name); // Encodage pour éviter les erreurs avec les espaces ou caractères spéciaux
+    window.location.href = `/frontend/src/pages/category.html?genre=${genreName}`;
+}
+
+export async function fetchAndDisplayGenres(genresToDisplay, selectedGenre = null) {
+    // Vérifier si genresToDisplay est un tableau avant de l'itérer
+    if (!Array.isArray(genresToDisplay)) {
+        console.error('genresToDisplay n\'est pas un tableau.', genresToDisplay);
+        return;  // Si ce n'est pas un tableau, sortir de la fonction pour éviter l'erreur
+    }
+
+    // Si un genre spécifique est sélectionné, ignorer les autres
+    if (selectedGenre) {
+        console.log(`Chargement des films pour "${selectedGenre}"...`);
+        await fetchFilmsByGenre(selectedGenre, null); // Pas de limite, récupérer tous les films pour ce genre
+        return;
+    }
+
+    
+    
+    // Récupérer et afficher les genres limités à 18 films
+    for (const genre of genresToDisplay) {
+        console.log(`Chargement des films pour "${genre}" (limité à 18)...`);
+        await fetchFilmsByGenre(genre, 18); // Limite à 18 films
+    }
+    
+}
+
+
+// Charger les films par genre
+export async function fetchFilmsByGenre(genre, limit = null) {
+    // Vérifier si un genre valide est sélectionné
+    if (!genre || genre.trim() === '') {
+        console.error("Aucun genre sélectionné. Impossible de récupérer les films.");
+        return [];  // Ne rien faire si aucun genre n'est sélectionné
+    }
+
+    const apiUrl = `${apiUrlFilmsByGenre}${genre}&ordering=-imdb_score`;
+    let allFilms = [];
+    let nextPageUrl = apiUrl;
+
+    try {
+        while (nextPageUrl && (limit === null || allFilms.length < limit)) {
+            const response = await fetch(nextPageUrl);
+
+            if (!response.ok) {
+                throw new Error(`Erreur de récupération des films pour "${genre}", code: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.results || !Array.isArray(data.results)) {
+                throw new Error(`Pas de films trouvés pour "${genre}" dans la réponse de l'API.`);
+            }
+
+            const films = data.results;
+
+            // Si une limite est définie, couper la liste de films dès qu'on a atteint la limite
+            allFilms = allFilms.concat(films);
+
+            // Mise à jour de l'URL pour la page suivante
+            nextPageUrl = data.next;
+        }
+
+        console.log(`Films récupérés pour "${genre}" (limité à ${limit}):`, allFilms.length);  // Afficher la taille correcte du tableau
+          
+        
+        // Afficher les films dans le carrousel
+        displayFilmsInCarousel(genre, allFilms);
+        return allFilms;
+        
+    } catch (error) {
+        console.error(`Erreur dans la récupération des films pour le genre "${genre}" :`, error);
+        return [];
+    }
+}
+
 // Fonction pour récupérer tous les films (avec pagination)
-async function fetchData() {
+export async function fetchData() {
     try {
         let allFilms = [];  // Tableau pour stocker tous les films récupérés
         let nextPageUrl = apiUrlFilms;  // Commencer avec l'URL de la première page
@@ -186,12 +196,16 @@ async function fetchData() {
             nextPageUrl = data.next;
         }
 
-        // Afficher le premier film avec la meilleure note (par exemple)
-        const topFilm = findTopFilm(allFilms); // Trouve le film le mieux noté
-        displayTopFilm(topFilm);
+        // Vérifier si nous sommes sur la page d'accueil
+        if (currentPage === '/frontend/src/index.html' || currentPage === '/') {
+            // Page d'accueil, donc afficher les films populaires
+            // Afficher le premier film avec la meilleure note
+            const topFilm = findTopFilm(allFilms); // Trouve le film le mieux noté
+            displayTopFilm(topFilm);
 
-        // Afficher les films les mieux notés
-        displayTopRatedFilms(allFilms);
+            // Afficher les films les mieux notés
+            displayTopRatedFilms(allFilms);
+        }
         // Si moins de 6 films ont été récupérés, on peut gérer ce cas ici
         if (allFilms.length < 6) {
             console.log("Il y a moins de 6 films disponibles.");
@@ -202,7 +216,7 @@ async function fetchData() {
     }
 }
 
-async function fetchFilmDetails(filmId) {
+export async function fetchFilmDetails(filmId) {
     const filmUrl = `http://localhost:8000/api/v1/titles/${filmId}`;
     try {
         const response = await fetch(filmUrl);
@@ -270,7 +284,7 @@ async function displayTopFilm(film) {
     }
 }
 
-function showFilmDetails(film) {
+export function showFilmDetails(film) {
     console.log("Film reçu dans showFilmDetails : ", film); // Affiche l'objet film complet
 
     if (!film) {
@@ -444,7 +458,6 @@ function displayTopRatedFilms(films) {
 }
 
 function displayFilmsInCarousel(genre, films) {
-
     const container = document.getElementById(`${genre}Films`);
     if (!container) {
         console.error(`Le conteneur pour le genre ${genre} n'a pas été trouvé.`);
@@ -459,6 +472,12 @@ function displayFilmsInCarousel(genre, films) {
         return;
     }
 
+    // Trier les films par leur score de manière décroissante
+    films.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+
+    // Limiter à 18 films
+    const topFilms = films.slice(0, 18);
+
     // Créer le bouton "Voir plus" et ajouter les classes Bootstrap
     const voirPlusButton = document.createElement('button');
     voirPlusButton.classList.add('btn', 'btn-danger', 'btn-block', 'mt-3');
@@ -472,7 +491,6 @@ function displayFilmsInCarousel(genre, films) {
     const isSmartphone = window.innerWidth <= 768;
 
     if (isSmartphone) {
-
         const carouselIcons = document.querySelectorAll(
             `.carousel-control-prev, .carousel-control-next, .carousel-indicators`
         );
@@ -483,7 +501,7 @@ function displayFilmsInCarousel(genre, films) {
         // Fonction pour afficher les films
         const renderFilms = () => {
             const fragment = document.createDocumentFragment();
-            const filmsToDisplay = films.slice(currentVisibleCount, currentVisibleCount + maxVisibleFilms);
+            const filmsToDisplay = topFilms.slice(currentVisibleCount, currentVisibleCount + maxVisibleFilms);
 
             filmsToDisplay.forEach(film => {
                 const filmElement = document.createElement('div');
@@ -509,7 +527,7 @@ function displayFilmsInCarousel(genre, films) {
             currentVisibleCount += filmsToDisplay.length;
 
             // Gérer l'affichage du bouton "Voir plus"
-            if (currentVisibleCount >= films.length) {
+            if (currentVisibleCount >= topFilms.length) {
                 voirPlusButton.style.display = 'none'; // Masquer le bouton quand tous les films sont affichés
             }
 
@@ -528,11 +546,11 @@ function displayFilmsInCarousel(genre, films) {
     } else {
         // Mode bureau : affichage en carrousel
         const filmsPerSlide = 6; // Nombre de films par slide
-        const numSlides = Math.ceil(films.length / filmsPerSlide);
+        const numSlides = Math.ceil(topFilms.length / filmsPerSlide);
         const fragment = document.createDocumentFragment();
 
         for (let slideIndex = 0; slideIndex < numSlides; slideIndex++) {
-            const slideFilms = films.slice(slideIndex * filmsPerSlide, (slideIndex + 1) * filmsPerSlide);
+            const slideFilms = topFilms.slice(slideIndex * filmsPerSlide, (slideIndex + 1) * filmsPerSlide);
 
             const slideElement = document.createElement('div');
             slideElement.classList.add('carousel-item');
@@ -574,7 +592,7 @@ function displayFilmsInCarousel(genre, films) {
     detailButtons.forEach(button => {
         button.addEventListener('click', function () {
             const filmId = button.getAttribute('data-film-id');
-            const film = films.find(f => String(f.id) === filmId);
+            const film = topFilms.find(f => String(f.id) === filmId);
 
             if (film) {
                 showFilmDetails(film);
@@ -583,33 +601,8 @@ function displayFilmsInCarousel(genre, films) {
             }
         });
     });
-
-    const carouselItems = document.getElementById('carouselItems');
-    const filmCarousel = document.getElementById('filmCarousel');
-    carouselItems.innerHTML = ''; // Vider le carrousel avant de rajouter les films
-
-    filmCarousel.style.display = 'block'; // Afficher le carrousel
-
-    films.forEach((film, index) => {
-        const isActive = index === 0 ? 'active' : ''; // Le premier film sera actif
-        const filmItem = document.createElement('div');
-        filmItem.classList.add('carousel-item', isActive);
-
-        // Ajouter une image de film et le titre
-        filmItem.innerHTML = `
-            <div class="film-image-container">
-                <img src="${film.image_url || '/path/to/default-image.jpg'}" class="d-block w-100" alt="${film.title}">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>${film.title}</h5>
-                </div>
-            </div>
-        `;
-
-        carouselItems.appendChild(filmItem);
-    });
-
-    initCarousel(genre);
 }
+
 
 // Fonction pour initialiser le carrousel avec Bootstrap
 // Assurez-vous que cette fonction est bien définie quelque part dans votre code
