@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de la catégorie</title>
+    <link rel="stylesheet" href="/frontend/assets/css/styles.css">
+    <!-- Bootstrap CSS local -->
+    <link rel="stylesheet" href="/frontend/assets/css/bootstrap.min.css">
+    <!-- CDN pour Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <script type="module" src="/frontend/assets/js/categorie.js" defer></script>
+    <!-- Bootstrap JS local (avec bundle.min.js pour le JS de Bootstrap inclu) -->
+    <script src="/frontend/assets/js/bootstrap.bundle.min.js"></script>
+</head>
+
+<body>
+    <section>
+        <header class="banniere">
+            <button id="menuButton" class="menu-button">☰ Menu</button>
+            <img class="logo" src="https://user.oc-static.com/upload/2020/09/18/16004298163529_P5.png" alt="logo JustStreamIt">
+            <h1 id="categoryTitle">Films pour la catégorie</h1>
+        </header>
+    </section>
+
+    <main>
+        <nav id="sidebar" class="side-nav">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="form-control" placeholder="Rechercher...">
+                <button id="searchButton">
+                    <i class="bi bi-search"></i> <!-- Icône de loupe de Bootstrap Icons -->
+                </button>
+            </div>
+            <!-- Catégories -->
+            <div class="categories-container">
+                <h4>Catégorie :</h4>
+                <div id="categoriesList">
+                    <!-- Les catégories de l'API seront injectées ici -->
+                </div>
+            </div>
+        </nav>
+        
+        <section class="categorie">
+            <div id="categoryTitle" class="container2 film-image-container:hover img "></div>
+            <div id="filmsContainer" class="container2">
+                <div class="row">
+                    <!-- Les films seront ajoutés ici par JavaScript -->
+                </div>
+            </div>
+        </section>       
+    </main>    
+
+    <div class="modal fade" id="filmDetailsModal" tabindex="-1" aria-labelledby="filmDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="filmDetailsModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="filmDetailsContent">
+                    <!-- Contenu des détails du film (sera injecté via JavaScript) -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 JustStreamIt. Tous droits réservés.</p>
+            <p>Suivez-nous :</p>
+            <div class="d-flex justify-content-center">
+                <a href="https://facebook.com" class="text-white mx-2"><i class="bi bi-facebook"></i></a>
+                <a href="https://twitter.com" class="text-white mx-2"><i class="bi bi-twitter"></i></a>
+                <a href="https://instagram.com" class="text-white mx-2"><i class="bi bi-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
+
+
