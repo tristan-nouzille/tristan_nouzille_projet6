@@ -237,7 +237,7 @@ async function displayTopFilm(film) {
                     <p><strong>Description :</strong> ${descriptionToDisplay}</p>
                 </div>
                 <div>
-                    <button id="detailsButton${film.id}" class="btn-dangerD">Détails</button>
+                    <button id="detailsButton${film.id}" class= "btn-dangerD">Détails</button>
                 </div>
             </div>
         `;
