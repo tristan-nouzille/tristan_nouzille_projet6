@@ -427,7 +427,7 @@ main {
     }
 
     .text-col p {
-        font-size: 1.2em; /* Réduire la taille du texte pour les petits écrans */
+        font-size: 0.5em; /* Réduire la taille du texte pour les petits écrans */
     }
 
     .bestmovie {
@@ -440,7 +440,7 @@ main {
         font-size: 14px; /* Réduire la taille de police sur les petits écrans */
         position: relative;
         top: 220px;
-        left: 200px;
+        left: 250px;
 
     }
     .banniere {
@@ -462,11 +462,21 @@ main {
     .banniere {
         height: 80px;
     }
+    
+    h1#categoryTitle {
+        font-size: 18px; /* Réduisez la taille à une valeur adaptée */
+        line-height: 1.2; /* Ajustez l'espacement si nécessaire */
+    }
 
     .menu-button {
-        font-size: 16px;
-        padding: 8px 12px;
+        font-size: 0; /* Masque le texte */
     }
+
+    .menu-button::before {
+        content: "☰"; /* Ajoute uniquement l'icône */
+        font-size: 20px; /* Taille de l'icône */
+    }
+
     .btn-dangerD {
         width: 90%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
         height: 50px; /* Ajuster la hauteur si nécessaire pour les écrans plus petits */
@@ -478,7 +488,8 @@ main {
     }
 
     .logo {
-        width: 100px;
+        width: 50px;
+        height: auto;
     }
 
     #titre {
@@ -495,13 +506,10 @@ main {
         font-size: 12px;
     }
 
-    .text-col {
-        font-size: 10px;
-    }
-
     .text-col-p {
-        font-size: 15px;
+        font-size: 10px;
         text-align: center;
+        width: 100%; /* Ajoute cette ligne pour forcer la colonne à prendre toute la largeur */
     }
 
     .cadre {

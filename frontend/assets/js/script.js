@@ -1,11 +1,11 @@
-const apiUrlFilms = 'http://localhost:8000/api/v1/titles/';  // L'URL de l'API pour les films
+const apiUrlFilms = 'http://localhost:8000/api/v1/titles/';  // URL de l'API pour récupérer tous les films
 const apiUrlFilmsByGenre = 'http://localhost:8000/api/v1/titles/?genre=';  // URL pour récupérer les films par genre
-const currentPage = window.location.pathname; // Utilisation de window.location.pathname
+const currentPage = window.location.pathname;  // Utilisation de window.location.pathname pour déterminer la page actuelle
 
+const genresToDisplay = ['biography', 'horror'];  // Genres à afficher sur la page d'accueil
+fetchAndDisplayGenres(genresToDisplay);  // Chargement des films pour les genres spécifiés
 
-const genresToDisplay = ['biography', 'horror'];
-fetchAndDisplayGenres(genresToDisplay);
-
+// Fonction pour basculer la visibilité de la barre latérale
 export function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
     const mainContent = document.querySelector("main");
@@ -18,17 +18,17 @@ export function toggleSidebar() {
         mainContent.style.marginLeft = "250px";
     }
 
-    fetchAllCategories();
+    fetchAllCategories();  // Récupère toutes les catégories lors de l'ouverture de la barre latérale
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Maintenant le DOM est prêt à être manipulé.
-    fetchAllCategories();
-    document.getElementById("menuButton").addEventListener("click", toggleSidebar);
+    fetchAllCategories();  // Charge les catégories dès le chargement de la page
+    document.getElementById("menuButton").addEventListener("click", toggleSidebar);  // Ajoute l'événement au bouton du menu
 });
 
+// Fonction pour récupérer et afficher toutes les catégories disponibles
 export async function fetchAllCategories() {
-    const allCategories = []; // Toujours initialiser la liste des catégories
+    const allCategories = [];  // Initialisation du tableau pour stocker les catégories récupérées
     const apiUrl = 'http://localhost:8000/api/v1/genres/';
     let nextPageUrl = apiUrl;
 
@@ -40,25 +40,22 @@ export async function fetchAllCategories() {
 
             const data = await response.json();
 
-            // Vérifier si "results" existe et est un tableau
             if (data.results && Array.isArray(data.results)) {
-                allCategories.push(...data.results); // Ajouter les catégories à la liste
+                allCategories.push(...data.results);  // Ajoute les catégories au tableau
             } else {
-                console.warn("La réponse de l'API ne contient pas de 'results' ou n'est pas un tableau.");
+                console.warn("La réponse de l'API ne contient pas de 'results' ou ce n'est pas un tableau.");
             }
 
-            nextPageUrl = data.next; // Passer à la page suivante, ou null si terminée
+            nextPageUrl = data.next;  // Passe à la page suivante s'il y en a une
         }
 
         const categoriesList = document.getElementById('categoriesList');
         if (categoriesList) {
-            categoriesList.innerHTML = ''; // Nettoyer la liste avant de la remplir
+            categoriesList.innerHTML = '';  // Nettoie la liste avant de la remplir
 
-            // Vérifier si des catégories sont disponibles
             if (allCategories.length === 0) {
                 categoriesList.innerHTML = '<p>Aucune catégorie trouvée.</p>';
             } else {
-                // Parcourir et afficher les catégories
                 allCategories.forEach(genre => {
                     const p = document.createElement('p');
                     p.textContent = genre.name;
@@ -69,7 +66,7 @@ export async function fetchAllCategories() {
                         handleCategorySelection(genre);
                     });
 
-                    categoriesList.appendChild(p);
+                    categoriesList.appendChild(p);  // Ajoute chaque catégorie à la liste
                 });
             }
         } else {
@@ -80,55 +77,45 @@ export async function fetchAllCategories() {
     }
 }
 
-// Fonction pour récupérer les films par genre avec gestion de la pagination
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log("Initialisation de la page...");
-    
-    // Charger et afficher les catégories dans le menu
-    await fetchAllCategories();
-
-});
-
-// Gestion de la redirection lorsque l'utilisateur clique sur une catégorie
+// Fonction pour gérer la sélection d'une catégorie
 export function handleCategorySelection(genre) {
-    const genreName = encodeURIComponent(genre.name); // Encodage pour éviter les erreurs avec les espaces ou caractères spéciaux
-    window.location.href = `/frontend/src/pages/category.html?genre=${genreName}`;
+    const genreName = encodeURIComponent(genre.name);  // Encode le nom du genre pour éviter les erreurs d'URL
+    window.location.href = `/frontend/src/pages/category.html?genre=${genreName}`;  // Redirige vers la page de catégorie
 }
 
+// Fonction pour récupérer et afficher les films en fonction des genres sélectionnés
 export async function fetchAndDisplayGenres(genresToDisplay, selectedGenre = null) {
-    // Vérifier si genresToDisplay est un tableau avant de l'itérer
     if (!Array.isArray(genresToDisplay)) {
         console.error('genresToDisplay n\'est pas un tableau.', genresToDisplay);
-        return;  // Si ce n'est pas un tableau, sortir de la fonction pour éviter l'erreur
-    }
-
-    // Si un genre spécifique est sélectionné, ignorer les autres
-    if (selectedGenre) {
-        console.log(`Chargement des films pour "${selectedGenre}"...`);
-        await fetchFilmsByGenre(selectedGenre, null); // Pas de limite, récupérer tous les films pour ce genre
         return;
     }
 
-    
-    
-    // Récupérer et afficher les genres limités à 18 films
-    for (const genre of genresToDisplay) {
-        console.log(`Chargement des films pour "${genre}" (limité à 18)...`);
-        await fetchFilmsByGenre(genre, 18); // Limite à 18 films
+    // Si un genre est sélectionné, on affiche les films pour ce genre
+    if (selectedGenre) {
+        console.log(`Chargement des films pour "${selectedGenre}"...`);
+        await fetchFilmsByGenre(selectedGenre, null);
+        return;
     }
-    
+
+    // Vérifier si l'on est sur la page index.html
+    if (window.location.pathname === '/frontend/src/index.html' || window.location.pathname === '/') {
+        // Si nous sommes sur la page index.html, exécuter la boucle
+       for (const genre of genresToDisplay) {
+            console.log(`Chargement des films pour "${genre}" (limité à 18)...`);
+            await fetchFilmsByGenre(genre, 18);  // Limite à 18 films par genre
+        }
+        
+    }
 }
 
-
-// Charger les films par genre
+// Fonction pour récupérer les films par genre avec gestion de la pagination
 export async function fetchFilmsByGenre(genre, limit = null) {
-    // Vérifier si un genre valide est sélectionné
     if (!genre || genre.trim() === '') {
-        console.error("Aucun genre sélectionné. Impossible de récupérer les films.");
-        return [];  // Ne rien faire si aucun genre n'est sélectionné
+        console.error("Aucun genre sélectionné.");
+        return [];
     }
 
-    const apiUrl = `${apiUrlFilmsByGenre}${genre}&ordering=-imdb_score`;
+    const apiUrl = `${apiUrlFilmsByGenre}${genre}&ordering=-imdb_score`;  // Trie par score IMDb décroissant
     let allFilms = [];
     let nextPageUrl = apiUrl;
 
@@ -137,7 +124,7 @@ export async function fetchFilmsByGenre(genre, limit = null) {
             const response = await fetch(nextPageUrl);
 
             if (!response.ok) {
-                throw new Error(`Erreur de récupération des films pour "${genre}", code: ${response.status}`);
+                throw new Error(`Erreur lors de la récupération des films pour "${genre}", code: ${response.status}`);
             }
 
             const data = await response.json();
@@ -146,83 +133,66 @@ export async function fetchFilmsByGenre(genre, limit = null) {
                 throw new Error(`Pas de films trouvés pour "${genre}" dans la réponse de l'API.`);
             }
 
-            const films = data.results;
+            allFilms = allFilms.concat(data.results);  // Ajoute les films récupérés à la liste
 
-            // Si une limite est définie, couper la liste de films dès qu'on a atteint la limite
-            allFilms = allFilms.concat(films);
-
-            // Mise à jour de l'URL pour la page suivante
-            nextPageUrl = data.next;
+            nextPageUrl = data.next;  // Mise à jour de l'URL pour la page suivante
         }
 
-        console.log(`Films récupérés pour "${genre}" (limité à ${limit}):`, allFilms.length);  // Afficher la taille correcte du tableau
-          
-        
-        // Afficher les films dans le carrousel
-        displayFilmsInCarousel(genre, allFilms);
+        console.log(`Films récupérés pour "${genre}" : ${allFilms.length} films`);
+
+        // Affichage des films dans le carrousel (fonction à définir selon la structure de ton HTML)
+        displayFilmsInCarousel(genre, allFilms);  // Affiche les films dans le carrousel
         return allFilms;
-        
     } catch (error) {
-        console.error(`Erreur dans la récupération des films pour le genre "${genre}" :`, error);
+        console.error(`Erreur dans la récupération des films pour "${genre}" :`, error);
         return [];
     }
 }
 
-// Fonction pour récupérer tous les films (avec pagination)
+// Fonction pour récupérer tous les films avec pagination
 export async function fetchData() {
     try {
-        let allFilms = [];  // Tableau pour stocker tous les films récupérés
-        let nextPageUrl = apiUrlFilms;  // Commencer avec l'URL de la première page
+        let allFilms = [];
+        let nextPageUrl = apiUrlFilms;
 
-        // Continue de récupérer les pages tant qu'il y a une URL "next" ou que le nombre de films est insuffisant
         while (nextPageUrl) {
             const response = await fetch(nextPageUrl);
             if (!response.ok) throw new Error('Erreur de récupération des films');
+
             const data = await response.json();
-
-            // Vérifier les films récupérés
             const films = Array.isArray(data.results) ? data.results : [];
-            console.log("Films récupérés sur la page : ", films);
 
-            // Ajouter les films récupérés à la liste
             allFilms = allFilms.concat(films);
 
-            // Si on a récupéré suffisamment de films (par exemple 6), on s'arrête
             if (allFilms.length >= 18) {
                 break;
             }
 
-            // Si l'API retourne une page suivante, utiliser l'URL de la page suivante
-            nextPageUrl = data.next;
+            nextPageUrl = data.next;  // Mise à jour pour la page suivante
         }
 
-        // Vérifier si nous sommes sur la page d'accueil
         if (currentPage === '/frontend/src/index.html' || currentPage === '/') {
-            // Page d'accueil, donc afficher les films populaires
-            // Afficher le premier film avec la meilleure note
-            const topFilm = findTopFilm(allFilms); // Trouve le film le mieux noté
-            displayTopFilm(topFilm);
+            const topFilm = findTopFilm(allFilms);
+            displayTopFilm(topFilm);  // Affiche le film le mieux noté
 
-            // Afficher les films les mieux notés
-            displayTopRatedFilms(allFilms);
+            displayTopRatedFilms(allFilms);  // Affiche les films les mieux notés
         }
-        // Si moins de 6 films ont été récupérés, on peut gérer ce cas ici
+
         if (allFilms.length < 6) {
             console.log("Il y a moins de 6 films disponibles.");
         }
-
     } catch (error) {
         console.error('Erreur dans la récupération des films :', error);
     }
 }
 
+// Fonction pour récupérer les détails d'un film spécifique
 export async function fetchFilmDetails(filmId) {
     const filmUrl = `http://localhost:8000/api/v1/titles/${filmId}`;
     try {
         const response = await fetch(filmUrl);
         if (!response.ok) throw new Error('Erreur de récupération des détails du film');
-        const filmDetails = await response.json();
-        return filmDetails;  // Retourne les détails du film
+        return await response.json();  // Retourne les détails du film
     } catch (error) {
         console.error('Erreur lors de la récupération des détails du film:', error);
     }
@@ -353,8 +323,9 @@ function displayTopRatedFilms(films) {
     // Vider l'élément avant d'ajouter de nouveaux films
     ratedFilms.innerHTML = '';
 
-    // Vérifier si l'écran est un smartphone (largeur maximale de 768px)
-    const isSmartphone = window.innerWidth <= 768;
+    // Vérifier le type d'écran
+    const isSmartphone = window.innerWidth <= 768; // Smartphone
+    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024; // Tablette
 
     // Créer le bouton "Voir plus" une seule fois
     const voirPlusButton = document.createElement('button');
@@ -370,77 +341,58 @@ function displayTopRatedFilms(films) {
         const maxVisibleFilms = 1; // Nombre de films affichés à la fois
         let currentVisibleCount = 0;
 
-        // Fonction pour afficher les films un par un
         const renderFilms = () => {
             const filmsToDisplay = topRatedFilms.slice(currentVisibleCount, currentVisibleCount + maxVisibleFilms);
 
-            // Ajouter les films sélectionnés au DOM
             filmsToDisplay.forEach(film => {
-                const filmElement = document.createElement('div');
-                filmElement.classList.add('film-item', 'mb-3');
-                const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';
-
-                filmElement.innerHTML = `
-                    <div class="film-image-container">
-                        <img src="${imageUrl}" class="d-block w-100" alt="${film.title}" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
-                        <div class="overlay">
-                            <h5>${film.title}</h5>
-                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
-                        </div>
-                    </div>
-                `;
+                const filmElement = createFilmElement(film);
                 ratedFilms.insertBefore(filmElement, voirPlusButton); // Ajouter avant le bouton "Voir plus"
             });
 
             currentVisibleCount += maxVisibleFilms;
 
-            // Masquer le bouton "Voir plus" si tous les films sont affichés
             if (currentVisibleCount >= topRatedFilms.length) {
                 voirPlusButton.style.display = 'none';
             }
 
-            // --- Défilement vers le bas ---
-            ratedFilms.scrollTop = ratedFilms.scrollHeight; // Défile vers le bas du conteneur
+            ratedFilms.scrollTop = ratedFilms.scrollHeight; // Défiler vers le bas
         };
 
-        // Initialiser l'affichage
         renderFilms();
-
-        // Ajouter un événement au bouton "Voir plus"
         voirPlusButton.addEventListener('click', renderFilms);
+
+    } else if (isTablet) {
+        // --- Affichage pour les tablettes ---
+        const maxVisibleFilms = 4; // Nombre de films affichés à la fois
+
+        for (let i = 0; i < maxVisibleFilms; i++) {
+            if (topRatedFilms[i]) {
+                const film = topRatedFilms[i];
+                const filmElement = createFilmElement(film);
+                ratedFilms.insertBefore(filmElement, voirPlusButton); // Ajouter avant le bouton "Voir plus"
+            }
+        }
+
+        voirPlusButton.style.display = 'none';
+        ratedFilms.scrollTop = ratedFilms.scrollHeight; // Défiler vers le bas
 
     } else {
         // --- Affichage pour les écrans larges ---
         const maxVisibleFilms = 6; // Limiter à 6 films maximum
 
         for (let i = 0; i < maxVisibleFilms; i++) {
-            if (topRatedFilms[i]) { // Vérifier si le film existe
+            if (topRatedFilms[i]) {
                 const film = topRatedFilms[i];
-                const filmElement = document.createElement('div');
-                filmElement.classList.add('film-item', 'mb-3');
-                const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';
-
-                filmElement.innerHTML = `
-                    <div class="film-image-container">
-                        <img src="${imageUrl}" class="d-block w-100" alt="${film.title}" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
-                        <div class="overlay">
-                            <h5>${film.title}</h5>
-                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
-                        </div>
-                    </div>
-                `;
+                const filmElement = createFilmElement(film);
                 ratedFilms.insertBefore(filmElement, voirPlusButton); // Ajouter avant le bouton "Voir plus"
             }
         }
 
-        // Masquer le bouton pour les écrans larges (si tous les films sont déjà affichés)
         voirPlusButton.style.display = 'none';
-
-        // --- Défilement vers le bas ---
-        ratedFilms.scrollTop = ratedFilms.scrollHeight; // Défiler vers le bas pour 6 films affichés
+        ratedFilms.scrollTop = ratedFilms.scrollHeight; // Défiler vers le bas
     }
 
-    // Gérer les boutons "Détails" (valable pour les deux cas)
+    // Gérer les boutons "Détails"
     ratedFilms.addEventListener('click', function (event) {
         if (event.target.classList.contains('detailsButton')) {
             const filmId = event.target.getAttribute('data-film-id');
@@ -456,6 +408,25 @@ function displayTopRatedFilms(films) {
         }
     });
 }
+
+// Fonction utilitaire pour créer un élément de film
+function createFilmElement(film) {
+    const filmElement = document.createElement('div');
+    filmElement.classList.add('film-item', 'mb-3');
+    const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';
+
+    filmElement.innerHTML = `
+        <div class="film-image-container">
+            <img src="${imageUrl}" class="d-block w-100" alt="${film.title}" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
+            <div class="overlay">
+                <h5>${film.title}</h5>
+                <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
+            </div>
+        </div>
+    `;
+    return filmElement;
+}
+
 
 function displayFilmsInCarousel(genre, films) {
     const container = document.getElementById(`${genre}Films`);
@@ -478,27 +449,20 @@ function displayFilmsInCarousel(genre, films) {
     // Limiter à 18 films
     const topFilms = films.slice(0, 18);
 
-    // Créer le bouton "Voir plus" et ajouter les classes Bootstrap
-    const voirPlusButton = document.createElement('button');
-    voirPlusButton.classList.add('btn', 'btn-danger', 'btn-block', 'mt-3');
-    voirPlusButton.textContent = 'Voir plus';
-    container.appendChild(voirPlusButton); // Ajouter le bouton après les films
-
-    // Appliquer un style pour s'assurer que le bouton reste en bas
-    container.style.position = 'relative';
-
-    // Vérifier si l'écran est un smartphone
+    // Vérifier les dimensions de l'écran
     const isSmartphone = window.innerWidth <= 768;
+    const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
 
     if (isSmartphone) {
-        const carouselIcons = document.querySelectorAll(
-            `.carousel-control-prev, .carousel-control-next, .carousel-indicators`
-        );
-        carouselIcons.forEach(icon => icon.remove());
-        const maxVisibleFilms = 3; // Nombre maximum de films visibles à la fois
+        // Mode smartphone : afficher 3 films à la fois
+        const maxVisibleFilms = 3;
         let currentVisibleCount = 0;
 
-        // Fonction pour afficher les films
+        const voirPlusButton = document.createElement('button');
+        voirPlusButton.classList.add('btn', 'btn-danger', 'btn-block', 'mt-3');
+        voirPlusButton.textContent = 'Voir plus';
+        container.appendChild(voirPlusButton);
+
         const renderFilms = () => {
             const fragment = document.createDocumentFragment();
             const filmsToDisplay = topFilms.slice(currentVisibleCount, currentVisibleCount + maxVisibleFilms);
@@ -513,7 +477,7 @@ function displayFilmsInCarousel(genre, films) {
                         <img src="${imageUrl}" class="img-fluid" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
                         <div class="overlay">
                             <h5>${film.title}</h5>
-                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton" aria-label="Voir les détails du film ${film.title}">
+                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">
                                 Détails
                             </button>
                         </div>
@@ -522,30 +486,22 @@ function displayFilmsInCarousel(genre, films) {
                 fragment.appendChild(filmElement);
             });
 
-            // Ajouter les films affichés au conteneur
-            container.insertBefore(fragment, voirPlusButton); // Ajouter les films avant le bouton "Voir plus"
-            currentVisibleCount += filmsToDisplay.length;
+            container.insertBefore(fragment, voirPlusButton);
+            currentVisibleCount += maxVisibleFilms;
 
-            // Gérer l'affichage du bouton "Voir plus"
             if (currentVisibleCount >= topFilms.length) {
-                voirPlusButton.style.display = 'none'; // Masquer le bouton quand tous les films sont affichés
+                voirPlusButton.style.display = 'none';
             }
 
-            // Faire défiler vers le bas si des films ont été ajoutés
             container.scrollTop = container.scrollHeight;
         };
 
-        // Ajouter un événement au bouton "Voir plus"
-        voirPlusButton.addEventListener('click', function () {
-            renderFilms();
-        });
-
-        // Afficher les premiers films au départ
         renderFilms();
 
+        voirPlusButton.addEventListener('click', renderFilms);
     } else {
-        // Mode bureau : affichage en carrousel
-        const filmsPerSlide = 6; // Nombre de films par slide
+        // Mode tablette ou bureau : affichage en carrousel
+        const filmsPerSlide = isTablet ? 4 : 6; // 4 films par slide pour les tablettes, 6 pour le bureau
         const numSlides = Math.ceil(topFilms.length / filmsPerSlide);
         const fragment = document.createDocumentFragment();
 
@@ -564,14 +520,14 @@ function displayFilmsInCarousel(genre, films) {
             slideFilms.forEach(film => {
                 const imageUrls = film.image_url || '/frontend/assets/images/default-image.jpg.png';
                 const filmElement = document.createElement('div');
-                filmElement.classList.add('col-md-2');
+                filmElement.classList.add(`col-${12 / filmsPerSlide}`); // Ajuster la largeur des colonnes dynamiquement
 
                 filmElement.innerHTML = `
                     <div class="film-image-container">
                         <img src="${imageUrls}" class="d-block w-100" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
                         <div class="overlay">
                             <h5>${film.title}</h5>
-                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton" aria-label="Voir les détails du film ${film.title}">
+                            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">
                                 Détails
                             </button>
                         </div>
@@ -602,7 +558,6 @@ function displayFilmsInCarousel(genre, films) {
         });
     });
 }
-
 
 // Fonction pour initialiser le carrousel avec Bootstrap
 // Assurez-vous que cette fonction est bien définie quelque part dans votre code

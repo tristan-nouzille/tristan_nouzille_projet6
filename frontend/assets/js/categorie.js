@@ -1,165 +1,209 @@
 import {
     fetchFilmsByGenre,
-    toggleSidebar,
     fetchFilmDetails,
     showFilmDetails
 } from './script.js';
 
+let genreName;
+
+// Fonction pour précharger les images
+async function preloadImage(url) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => resolve(url);
+        img.onerror = () => resolve('/frontend/assets/images/default-image.jpg.png');
+    });
+}
+
+// Fonction pour stocker les données en sessionStorage en gérant le dépassement de quota
+function safeSetItem(key, value) {
+    try {
+        sessionStorage.setItem(key, value);
+    } catch (error) {
+        if (error.name === "QuotaExceededError") {
+            console.warn("Quota de sessionStorage dépassé. Nettoyage en cours...");
+            sessionStorage.clear();
+            sessionStorage.setItem(key, value);
+        } else {
+            console.error("Erreur lors de l'enregistrement dans sessionStorage :", error);
+        }
+    }
+}
+
+// Fonction pour afficher les films d'une page
+async function displayFilmsForPage(genreName, currentPage, filmsPerPage = 24) {
+    const offset = (currentPage - 1) * filmsPerPage;
+
+    // Vérifier si les films sont déjà stockés dans sessionStorage
+    let filmsByGenre = JSON.parse(sessionStorage.getItem(`films_${genreName}`));
+
+    if (!filmsByGenre) {
+        try {
+            filmsByGenre = await fetchFilmsByGenre(genreName);
+            safeSetItem(`films_${genreName}`, JSON.stringify(filmsByGenre));
+        } catch (error) {
+            console.error('Erreur lors de la récupération des films :', error);
+            return;
+        }
+    }
+
+    const sortedFilms = filmsByGenre.sort((a, b) => {
+        const ratingA = parseFloat(a.imdb_score) || 0;
+        const ratingB = parseFloat(b.imdb_score) || 0;
+        return ratingB - ratingA;
+    });
+
+    const paginatedFilms = sortedFilms.slice(offset, offset + filmsPerPage);
+
+    const filmsContainer = document.getElementById('filmsContainer');
+    if (!filmsContainer) return;
+
+    filmsContainer.innerHTML = '<p>Chargement des films...</p>';
+
+    const filmElements = await Promise.all(
+        paginatedFilms.map(async (film) => createFilmElement(film))
+    );
+
+    filmsContainer.innerHTML = '';
+    const rowElement = document.createElement('div');
+    rowElement.classList.add('row');
+
+    filmElements.forEach((filmElement) => {
+        const colElement = document.createElement('div');
+        colElement.classList.add('col-12', 'col-sm-6', 'col-md-3', 'col-lg-2'); // Mise à jour pour 4 images par ligne en tablette
+        colElement.appendChild(filmElement);
+        rowElement.appendChild(colElement);
+    });
+
+    filmsContainer.appendChild(rowElement);
+    updatePagination(currentPage, sortedFilms.length, filmsPerPage);
+
+    lazyLoadImages();
+}
+
 // Fonction pour créer un élément HTML représentant un film
-function createFilmElement(film) {
+async function createFilmElement(film) {
     const filmElement = document.createElement('div');
-    filmElement.classList.add('film-item');
-    filmElement.style.padding = '10px';
+    filmElement.classList.add('film-item', 'mb-3');
 
-    const imageUrl = film.image_url || '/frontend/assets/images/default-image.jpg.png';
-
+    const imageUrl = await preloadImage(film.image_url || '/frontend/assets/images/default-image.jpg.png');
     filmElement.innerHTML = `
-        <img src="${imageUrl}" class="img-fluid" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
-        <div class="overlay">
-            <p>${film.title}</p>
-            <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">
-                Détails
-            </button>
+        <div class="film-image-container">
+            <img data-src="${imageUrl}" class="img-fluid lazy-image" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
+            <div class="overlay">
+                <h4>${film.title}</h4>
+                <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
+            </div>
         </div>
     `;
 
-    // Ajouter un événement au bouton "Détails"
     const detailsButton = filmElement.querySelector('.detailsButton');
     detailsButton.addEventListener('click', () => {
-        fetchFilmDetails(film.id).then(filmDetails => {
-            showFilmDetails(filmDetails);
-        }).catch(error => {
-            console.error('Erreur lors de la récupération des détails du film :', error);
-        });
+        fetchFilmDetails(film.id)
+            .then(showFilmDetails)
+            .catch((error) => {
+                console.error('Erreur lors de la récupération des détails du film :', error);
+            });
     });
 
     return filmElement;
 }
 
-// Fonction pour afficher les films pour la page donnée
-async function displayFilmsForPage(genreName, currentPage, filmsPerPage) {
-    try {
-        // Récupérer les films du genre spécifié
-        const filmsByGenre = await fetchFilmsByGenre(genreName);
-
-        // Calcul de l'index de départ et d'arrêt pour la pagination
-        const startIndex = (currentPage - 1) * filmsPerPage;
-        const paginatedFilms = filmsByGenre.slice(startIndex, startIndex + filmsPerPage);
-
-        const filmsContainer = document.getElementById('filmsContainer');
-        if (filmsContainer) {
-            filmsContainer.innerHTML = '';  // Effacer le contenu précédent
-
-            // Ajouter chaque film à l'élément container
-            paginatedFilms.forEach(film => {
-                const filmElement = createFilmElement(film);
-                filmsContainer.appendChild(filmElement);
-            });
-
-            // Mettre à jour la pagination
-            updatePagination(currentPage, filmsByGenre.length, filmsPerPage);
-        }
-    } catch (error) {
-        console.error('Erreur lors de la récupération des films par genre :', error);
-    }
-}
-
-// Fonction pour mettre à jour la pagination avec Bootstrap
+// Fonction pour mettre à jour la pagination
 function updatePagination(currentPage, totalFilms, filmsPerPage) {
     const totalPages = Math.ceil(totalFilms / filmsPerPage);
-    const paginationContainer = document.getElementById('paginationContainer');
+    const paginationElement = document.getElementById('pagination');
 
-    if (paginationContainer) {
-        paginationContainer.innerHTML = '';  // Effacer la pagination précédente
-
-        // Création de la structure de la pagination Bootstrap
-        const paginationList = document.createElement('ul');
-        paginationList.classList.add('pagination');
-
-        // Ajouter le bouton "Précédent"
-        const prevPage = document.createElement('li');
-        prevPage.classList.add('page-item');
-        if (currentPage === 1) {
-            prevPage.classList.add('disabled');
-        }
-        prevPage.innerHTML = `
-            <a class="page-link" href="#" aria-label="Previous">
-                <span aria-hidden="true">&laquo;</span>
-                <span class="sr-only">Previous</span>
-            </a>
-        `;
-        prevPage.querySelector('a').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentPage > 1) displayFilmsForPage(genreName, currentPage - 1, filmsPerPage);
-        });
-
-        // Ajouter les pages numérotées
-        for (let i = 1; i <= totalPages; i++) {
-            const pageItem = document.createElement('li');
-            pageItem.classList.add('page-item');
-            if (i === currentPage) {
-                pageItem.classList.add('active');
-            }
-            pageItem.innerHTML = `<a class="page-link" href="#">${i}</a>`;
-            pageItem.querySelector('a').addEventListener('click', (e) => {
-                e.preventDefault();
-                displayFilmsForPage(genreName, i, filmsPerPage);
-            });
-            paginationList.appendChild(pageItem);
-        }
-
-        // Ajouter le bouton "Suivant"
-        const nextPage = document.createElement('li');
-        nextPage.classList.add('page-item');
-        if (currentPage === totalPages) {
-            nextPage.classList.add('disabled');
-        }
-        nextPage.innerHTML = `
-            <a class="page-link" href="#" aria-label="Next">
-                <span aria-hidden="true">&raquo;</span>
-                <span class="sr-only">Next</span>
-            </a>
-        `;
-        nextPage.querySelector('a').addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentPage < totalPages) displayFilmsForPage(genreName, currentPage + 1, filmsPerPage);
-        });
-
-        // Ajouter la pagination à son container
-        paginationList.appendChild(prevPage);
-        paginationList.appendChild(nextPage);
-        paginationContainer.appendChild(paginationList);
+    if (!paginationElement) {
+        console.error("L'élément avec l'ID 'pagination' est introuvable.");
+        return;
     }
+
+    paginationElement.innerHTML = '';
+
+    const createButton = (label, isDisabled, onClick) => {
+        const button = document.createElement('button');
+        button.textContent = label;
+        button.classList.add('btn', 'btn-secondary', 'btn-sm');
+        button.disabled = isDisabled;
+        button.addEventListener('click', onClick);
+        return button;
+    };
+
+    paginationElement.appendChild(
+        createButton('Précédent', currentPage === 1, () => {
+            updateURL(currentPage - 1);
+            displayFilmsForPage(genreName, currentPage - 1, filmsPerPage);
+        })
+    );
+
+    const pageNumber = document.createElement('span');
+    pageNumber.classList.add('page-number', 'mx-3', 'text-white');
+    pageNumber.textContent = `Page ${currentPage} sur ${totalPages}`;
+    paginationElement.appendChild(pageNumber);
+
+    paginationElement.appendChild(
+        createButton('Suivant', currentPage === totalPages, () => {
+            updateURL(currentPage + 1);
+            displayFilmsForPage(genreName, currentPage + 1, filmsPerPage);
+        })
+    );
 }
 
-// Initialisation principale
+// Fonction pour mettre à jour l'URL sans recharger la page
+function updateURL(pageNumber) {
+    const currentURL = new URL(window.location.href);
+    currentURL.searchParams.set('page', pageNumber);
+    window.history.pushState({}, '', currentURL);
+}
+
+// Lazy loading avancé avec IntersectionObserver
+function lazyLoadImages() {
+    const images = document.querySelectorAll('img.lazy-image');
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
+                img.src = img.dataset.src;
+                img.classList.remove('lazy-image');
+                observer.unobserve(img);
+            }
+        });
+    });
+
+    images.forEach((img) => observer.observe(img));
+}
+
+// Lors de la récupération de la page
 document.addEventListener('DOMContentLoaded', async () => {
-    const filmsPerPage = 24;  // Nombre de films à afficher par page
-    let currentPage = 1;  // Page actuelle
-
-    // Gestion du bouton de la barre latérale
-    const sidebarToggleButton = document.getElementById('menuButton');
-    if (sidebarToggleButton) {
-        sidebarToggleButton.addEventListener('click', toggleSidebar);
-    }
-
-    // Récupérer le genre depuis l'URL
+    const filmsPerPage = 24;
     const urlParams = new URLSearchParams(window.location.search);
-    const genreName = urlParams.get('genre');
+    genreName = urlParams.get('genre');
+    const currentPage = parseInt(urlParams.get('page') || '1', 10);
+
     if (!genreName) {
         console.error("Aucune catégorie spécifiée dans l'URL.");
         return;
     }
 
-    // Mettre à jour le titre de la catégorie
     const categoryTitle = document.getElementById('categoryTitle');
     if (categoryTitle) {
         categoryTitle.textContent = `Films pour la catégorie : ${genreName}`;
     }
 
-    // Afficher les films pour la première page
     await displayFilmsForPage(genreName, currentPage, filmsPerPage);
 });
+
+
+
+
+
+
+
+
+
+
 
 
 
