@@ -31,9 +31,10 @@ section {
     align-items: center;
     justify-content: center;
     padding: 0 50px;
-    position: fixed;
+    position: absolute;
     width: 100%;
     top: 0;
+    left: 0;
     z-index: 10;
 }
 
@@ -74,7 +75,7 @@ section {
 .side-nav {
     width: 0;
     height: 100%;
-    position: fixed;
+    position: absolute;
     top: 100px;
     left: 0;
     background-color: rgb(27, 25, 25);
@@ -183,7 +184,7 @@ section {
     width: 200px;
     height: 80px;
     position: relative;
-    top: 220px;
+    top: 150px;
     left: 200px; 
 }
 
@@ -280,10 +281,12 @@ section {
 /* Le footer est positionné de manière fixe en bas de la page */
 footer {
     width: 100%;
+    height: 100%;
     background-color: #61787F;
     color: white;
     text-align: center;
     padding: 10px 0;
+    position: absolute;
 }
  
 /* Si tu veux que le contenu principal ne soit pas caché sous le footer */
@@ -294,6 +297,11 @@ main {
 
 
 @media (max-width: 1400px) {
+
+    main {
+        margin-left: 0; /* Pas de décalage du contenu */
+    }
+
     .cadre {
         flex-direction: column; /* Colonnes empilées sur petits écrans */
         width: 90%; /* Ajuster la largeur pour les petits écrans */
@@ -316,12 +324,12 @@ main {
     }
 
     .btn-dangerD {
-        width: 90%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
+        width: 70%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
         height: 50px; /* Ajuster la hauteur si nécessaire pour les écrans plus petits */
         font-size: 14px; /* Réduire la taille de police sur les petits écrans */
         position: relative;
-        top: 300px;
-        left: 150px;
+        top: 200px;
+        left: 70px;
 
     }
     .banniere {
@@ -359,12 +367,12 @@ main {
     }
 
     .btn-dangerD {
-        width: 90%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
+        width: 80%; /* Le bouton prendra 90% de la largeur sur les petits écrans */
         height: 50px; /* Ajuster la hauteur si nécessaire pour les écrans plus petits */
         font-size: 14px; /* Réduire la taille de police sur les petits écrans */
         position: relative;
-        top: 150px;
-        left: 80px;
+        top: 100px;
+        left: 30px;
 
     }
 

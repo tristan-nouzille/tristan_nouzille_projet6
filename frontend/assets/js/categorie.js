@@ -1,7 +1,7 @@
 import {
     fetchFilmsByGenre,
     fetchFilmDetails,
-    showFilmDetails
+    showFilmDetails,
 } from './script.js';
 
 let genreName;
@@ -16,7 +16,7 @@ async function preloadImage(url) {
     });
 }
 
-// Fonction pour stocker les données en sessionStorage en gérant le dépassement de quota
+// Fonction pour stocker les données dans sessionStorage avec gestion du quota
 function safeSetItem(key, value) {
     try {
         sessionStorage.setItem(key, value);
@@ -35,12 +35,18 @@ function safeSetItem(key, value) {
 async function displayFilmsForPage(genreName, currentPage, filmsPerPage = 24) {
     const offset = (currentPage - 1) * filmsPerPage;
 
-    // Vérifier si les films sont déjà stockés dans sessionStorage
+    // Vérification des films en sessionStorage
     let filmsByGenre = JSON.parse(sessionStorage.getItem(`films_${genreName}`));
 
     if (!filmsByGenre) {
         try {
             filmsByGenre = await fetchFilmsByGenre(genreName);
+            
+            // Limite à 1000 films maximum
+            if (filmsByGenre.length > 1000) {
+                filmsByGenre = filmsByGenre.slice(0, 2000);
+            }
+            
             safeSetItem(`films_${genreName}`, JSON.stringify(filmsByGenre));
         } catch (error) {
             console.error('Erreur lors de la récupération des films :', error);
@@ -71,7 +77,7 @@ async function displayFilmsForPage(genreName, currentPage, filmsPerPage = 24) {
 
     filmElements.forEach((filmElement) => {
         const colElement = document.createElement('div');
-        colElement.classList.add('col-12', 'col-sm-6', 'col-md-3', 'col-lg-2'); // Mise à jour pour 4 images par ligne en tablette
+        colElement.classList.add('col-12', 'col-sm-6', 'col-md-3', 'col-lg-2'); // 4 images par ligne
         colElement.appendChild(filmElement);
         rowElement.appendChild(colElement);
     });
@@ -82,13 +88,13 @@ async function displayFilmsForPage(genreName, currentPage, filmsPerPage = 24) {
     lazyLoadImages();
 }
 
-// Fonction pour créer un élément HTML représentant un film
+// Fonction pour créer un élément représentant un film
 async function createFilmElement(film) {
     const filmElement = document.createElement('div');
     filmElement.classList.add('film-item', 'mb-3');
 
     const imageUrl = await preloadImage(film.image_url || '/frontend/assets/images/default-image.jpg.png');
-    filmElement.innerHTML = `
+    filmElement.innerHTML = `  
         <div class="film-image-container">
             <img data-src="${imageUrl}" class="img-fluid lazy-image" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
             <div class="overlay">
@@ -158,7 +164,7 @@ function updateURL(pageNumber) {
     window.history.pushState({}, '', currentURL);
 }
 
-// Lazy loading avancé avec IntersectionObserver
+// Lazy loading des images avec IntersectionObserver
 function lazyLoadImages() {
     const images = document.querySelectorAll('img.lazy-image');
     const observer = new IntersectionObserver((entries, observer) => {
@@ -175,7 +181,7 @@ function lazyLoadImages() {
     images.forEach((img) => observer.observe(img));
 }
 
-// Lors de la récupération de la page
+// Exécution lorsque la page est chargée
 document.addEventListener('DOMContentLoaded', async () => {
     const filmsPerPage = 24;
     const urlParams = new URLSearchParams(window.location.search);
@@ -194,6 +200,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await displayFilmsForPage(genreName, currentPage, filmsPerPage);
 });
+
+// Debugging pour vérifier le chargement
+console.log("categorie.js est bien chargé");
+
+
+
+
+
 
 
 

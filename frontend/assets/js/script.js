@@ -1,58 +1,69 @@
-const apiUrlFilms = 'http://localhost:8000/api/v1/titles/';  // URL de l'API pour récupérer tous les films
-const apiUrlFilmsByGenre = 'http://localhost:8000/api/v1/titles/?genre=';  // URL pour récupérer les films par genre
-const currentPage = window.location.pathname;  // Utilisation de window.location.pathname pour déterminer la page actuelle
-
-const genresToDisplay = ['biography', 'horror'];  // Genres à afficher sur la page d'accueil
-fetchAndDisplayGenres(genresToDisplay);  // Chargement des films pour les genres spécifiés
+const apiUrlFilms = 'http://localhost:8000/api/v1/titles/'; // URL de l'API pour récupérer tous les films
+const apiUrlFilmsByGenre = 'http://localhost:8000/api/v1/titles/?genre='; // URL pour récupérer les films par genre
+const currentPage = window.location.pathname; // Utilisation de window.location.pathname pour déterminer la page actuelle
+const genreCache = new Map(); // Cache global pour stocker les films récupérés par genre
 
 // Fonction pour basculer la visibilité de la barre latérale
 export function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
     const mainContent = document.querySelector("main");
+    const isMobileOrTablet = window.innerWidth <= 1024; // Détecte les tablettes et smartphones
 
     if (sidebar.style.width === "250px") {
+        // Ferme la barre latérale
         sidebar.style.width = "0";
-        mainContent.style.marginLeft = "0";
+
+        if (!isMobileOrTablet) {
+            mainContent.style.marginLeft = "0"; // Réinitialise le décalage sur bureau
+        }
     } else {
+        // Ouvre la barre latérale
         sidebar.style.width = "250px";
-        mainContent.style.marginLeft = "250px";
+
+        if (!isMobileOrTablet) {
+            mainContent.style.marginLeft = "250px"; // Décale le contenu sur bureau
+        }
     }
 
-    fetchAllCategories();  // Récupère toutes les catégories lors de l'ouverture de la barre latérale
+    fetchAllCategories(); // Récupère toutes les catégories lors de l'ouverture de la barre latérale
 }
 
+// Événements exécutés au chargement du DOM
 document.addEventListener("DOMContentLoaded", () => {
-    fetchAllCategories();  // Charge les catégories dès le chargement de la page
-    document.getElementById("menuButton").addEventListener("click", toggleSidebar);  // Ajoute l'événement au bouton du menu
+    fetchAllCategories(); // Charge les catégories dès le chargement de la page
+    document.getElementById("menuButton").addEventListener("click", toggleSidebar); // Ajoute l'événement au bouton du menu
+    fetchAndDisplayGenres(); // Récupère les films par genres pour la page d'accueil
 });
 
 // Fonction pour récupérer et afficher toutes les catégories disponibles
 export async function fetchAllCategories() {
-    const allCategories = [];  // Initialisation du tableau pour stocker les catégories récupérées
     const apiUrl = 'http://localhost:8000/api/v1/genres/';
-    let nextPageUrl = apiUrl;
+    const allCategories = [];
 
-    try {
-        // Charger les données paginées
-        while (nextPageUrl) {
-            const response = await fetch(nextPageUrl);
+    async function fetchPage(url) {
+        if (!url) return;
+
+        try {
+            const response = await fetch(url);
             if (!response.ok) throw new Error(`Erreur HTTP : ${response.status}`);
 
             const data = await response.json();
-
             if (data.results && Array.isArray(data.results)) {
-                allCategories.push(...data.results);  // Ajoute les catégories au tableau
-            } else {
-                console.warn("La réponse de l'API ne contient pas de 'results' ou ce n'est pas un tableau.");
+                allCategories.push(...data.results);
             }
 
-            nextPageUrl = data.next;  // Passe à la page suivante s'il y en a une
+            await fetchPage(data.next); // Récursion pour la page suivante
+        } catch (error) {
+            console.error('Erreur lors de la récupération des catégories :', error);
         }
+    }
+
+    try {
+        await fetchPage(apiUrl); // Démarre la récupération
 
         const categoriesList = document.getElementById('categoriesList');
         if (categoriesList) {
-            categoriesList.innerHTML = '';  // Nettoie la liste avant de la remplir
-
+            categoriesList.innerHTML = '';
             if (allCategories.length === 0) {
                 categoriesList.innerHTML = '<p>Aucune catégorie trouvée.</p>';
             } else {
@@ -66,11 +77,9 @@ export async function fetchAllCategories() {
                         handleCategorySelection(genre);
                     });
 
-                    categoriesList.appendChild(p);  // Ajoute chaque catégorie à la liste
+                    categoriesList.appendChild(p);
                 });
             }
-        } else {
-            console.error('Élément "categoriesList" non trouvé dans le DOM.');
         }
     } catch (error) {
         console.error('Erreur lors de la récupération des catégories :', error);
@@ -79,110 +88,154 @@ export async function fetchAllCategories() {
 
 // Fonction pour gérer la sélection d'une catégorie
 export function handleCategorySelection(genre) {
-    const genreName = encodeURIComponent(genre.name);  // Encode le nom du genre pour éviter les erreurs d'URL
-    window.location.href = `/frontend/src/pages/category.html?genre=${genreName}`;  // Redirige vers la page de catégorie
-}
+    // Vider le cache pour le genre sélectionné avant de charger les nouveaux films
+    genreCache.delete(genre.name); // Supprimer l'entrée de cache pour le genre actuel
 
-// Fonction pour récupérer et afficher les films en fonction des genres sélectionnés
-export async function fetchAndDisplayGenres(genresToDisplay, selectedGenre = null) {
-    if (!Array.isArray(genresToDisplay)) {
-        console.error('genresToDisplay n\'est pas un tableau.', genresToDisplay);
-        return;
-    }
-
-    // Si un genre est sélectionné, on affiche les films pour ce genre
-    if (selectedGenre) {
-        console.log(`Chargement des films pour "${selectedGenre}"...`);
-        await fetchFilmsByGenre(selectedGenre, null);
-        return;
-    }
-
-    // Vérifier si l'on est sur la page index.html
-    if (window.location.pathname === '/frontend/src/index.html' || window.location.pathname === '/') {
-        // Si nous sommes sur la page index.html, exécuter la boucle
-       for (const genre of genresToDisplay) {
-            console.log(`Chargement des films pour "${genre}" (limité à 18)...`);
-            await fetchFilmsByGenre(genre, 18);  // Limite à 18 films par genre
+    const genreName = encodeURIComponent(genre.name);
+    console.log("Avant la redirection:", window.location.pathname); // Affiche la page avant
+    window.location.href = `/frontend/src/pages/category.html?genre=${genreName}`;
+    
+    // Vérifier la nouvelle page après redirection
+    window.addEventListener('load', () => {
+        const currentPage = window.location.pathname.split('/').pop();
+        console.log("Après la redirection:", currentPage); // Affiche la page après
+        if (currentPage === 'category.html') {
+            console.log("Tu es bien dans category.html");
         }
-        
+    });
+}
+
+// Fonction pour récupérer et afficher les films par genres définis
+export async function fetchAndDisplayGenres(selectedGenre = null) {
+    // Si un genre est sélectionné, récupère uniquement les films pour ce genre
+    if (selectedGenre) {
+        console.log(`Chargement des films pour le genre sélectionné "${selectedGenre}"...`);
+        if (!genres.includes(selectedGenre)) {
+            await fetchFilmsByGenre(selectedGenre);
+        }
+        return;
+    }
+    
+    const genres = ['biography', 'horror']; // Genres prédéfinis
+    // Si aucun genre spécifique n'est sélectionné, charge les films pour les genres prédéfinis
+    if (currentPage === '/frontend/src/index.html' || currentPage === '/') {
+        for (const genre of genres) {
+            console.log(`Chargement des films pour le genre "${genre}"...`);
+            const films = await fetchFilmsByGenre(genre, 18); // Limite à 18 films par genre
+            if (films.length > 0) {
+                displayFilmsInCarousel(genre, films); // Affiche les films dans le carrousel
+            } else {
+                console.warn(`Aucun film trouvé pour le genre "${genre}".`);
+            }
+        }
     }
 }
 
-// Fonction pour récupérer les films par genre avec gestion de la pagination
-export async function fetchFilmsByGenre(genre, limit = null) {
-    if (!genre || genre.trim() === '') {
-        console.error("Aucun genre sélectionné.");
+// Fonction pour récupérer les films par genre avec une limite
+export async function fetchFilmsByGenre(genre, limit = 24) {
+    if (!genre || typeof genre !== 'string' || genre.trim() === '') {
+        console.error("Le genre fourni est invalide ou manquant.");
         return [];
     }
 
-    const apiUrl = `${apiUrlFilmsByGenre}${genre}&ordering=-imdb_score`;  // Trie par score IMDb décroissant
+    const currentPage = window.location.pathname.split('/').pop(); // Vérifie le nom de la page actuelle
+    let filmsLimit = limit;  // Définit la limite par défaut
+
+    // Si l'on est sur category.html, on récupère tous les films du genre sans limite
+    if (currentPage === 'category.html') {
+        filmsLimit = Infinity;  // Pas de limite de films
+        console.log("Aucune limite de films définie pour la page category.html");
+    }
+
+    // Vérifie si le genre est déjà dans le cache
+    if (genreCache.has(genre)) {
+        console.log(`Films pour le genre "${genre}" récupérés depuis le cache.`);
+        const cachedFilms = genreCache.get(genre);
+        return cachedFilms.slice(0, filmsLimit); // Limite les films si nécessaire
+    }
+
     let allFilms = [];
-    let nextPageUrl = apiUrl;
+    const apiUrl = `${apiUrlFilmsByGenre}${genre.trim()}&ordering=-imdb_score`; // API pour récupérer les films par genre
 
-    try {
-        while (nextPageUrl && (limit === null || allFilms.length < limit)) {
-            const response = await fetch(nextPageUrl);
+    async function fetchPage(url) {
+        if (!url || allFilms.length >= filmsLimit) return; // Arrêter la récupération si la limite est atteinte
 
-            if (!response.ok) {
-                throw new Error(`Erreur lors de la récupération des films pour "${genre}", code: ${response.status}`);
-            }
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Erreur lors de la récupération des films pour "${genre}"`);
 
             const data = await response.json();
+            if (data.results && Array.isArray(data.results)) {
+                allFilms = allFilms.concat(data.results);
 
-            if (!data.results || !Array.isArray(data.results)) {
-                throw new Error(`Pas de films trouvés pour "${genre}" dans la réponse de l'API.`);
+                // Si la limite est atteinte, arrête les requêtes supplémentaires
+                if (allFilms.length >= filmsLimit) {
+                    allFilms = allFilms.slice(0, filmsLimit); // Limiter à la quantité définie
+                    return; // Arrêter la récupération
+                }
             }
 
-            allFilms = allFilms.concat(data.results);  // Ajoute les films récupérés à la liste
-
-            nextPageUrl = data.next;  // Mise à jour de l'URL pour la page suivante
+            // Continue de récupérer si une page suivante existe et la limite n'est pas atteinte
+            if (data.next && allFilms.length < filmsLimit) {
+                await fetchPage(data.next);
+            }
+        } catch (error) {
+            console.error(`Erreur dans la récupération des films pour "${genre}" :`, error);
         }
+    }
+
+    try {
+        await fetchPage(apiUrl);
+
+        // Ajoute les films récupérés au cache
+        genreCache.set(genre, allFilms);
 
         console.log(`Films récupérés pour "${genre}" : ${allFilms.length} films`);
-
-        // Affichage des films dans le carrousel (fonction à définir selon la structure de ton HTML)
-        displayFilmsInCarousel(genre, allFilms);  // Affiche les films dans le carrousel
-        return allFilms;
+        return allFilms.slice(0, filmsLimit); // Retourne les films avec la limite appliquée
     } catch (error) {
-        console.error(`Erreur dans la récupération des films pour "${genre}" :`, error);
+        console.error(`Erreur lors de la récupération des films pour "${genre}" :`, error);
         return [];
     }
 }
 
-// Fonction pour récupérer tous les films avec pagination
+// Fonction pour récupérer les films les mieux notés
 export async function fetchData() {
-    try {
-        let allFilms = [];
-        let nextPageUrl = apiUrlFilms;
+    let allFilms = [];
+    let nextPageUrl = apiUrlFilms;
 
-        while (nextPageUrl) {
-            const response = await fetch(nextPageUrl);
+    async function fetchPage(url) {
+        if (!url || allFilms.length >= 18) return; // Arrêter la récupération si la limite est atteinte
+
+        try {
+            const response = await fetch(url);
             if (!response.ok) throw new Error('Erreur de récupération des films');
 
             const data = await response.json();
             const films = Array.isArray(data.results) ? data.results : [];
-
             allFilms = allFilms.concat(films);
 
-            if (allFilms.length >= 18) {
-                break;
-            }
+            if (allFilms.length >= 18) return; // Arrêter si la limite est atteinte
 
-            nextPageUrl = data.next;  // Mise à jour pour la page suivante
+            await fetchPage(data.next);
+        } catch (error) {
+            console.error('Erreur dans la récupération des films :', error);
         }
+    }
+
+    try {
+        await fetchPage(nextPageUrl);
 
         if (currentPage === '/frontend/src/index.html' || currentPage === '/') {
             const topFilm = findTopFilm(allFilms);
-            displayTopFilm(topFilm);  // Affiche le film le mieux noté
-
-            displayTopRatedFilms(allFilms);  // Affiche les films les mieux notés
+            displayTopFilm(topFilm);
+            displayTopRatedFilms(allFilms);
         }
 
         if (allFilms.length < 6) {
             console.log("Il y a moins de 6 films disponibles.");
         }
     } catch (error) {
-        console.error('Erreur dans la récupération des films :', error);
+        console.error('Erreur générale dans la récupération des films :', error);
     }
 }
 
@@ -427,7 +480,7 @@ function createFilmElement(film) {
     return filmElement;
 }
 
-
+// Fonction principale pour afficher les films dans le carrousel
 function displayFilmsInCarousel(genre, films) {
     const container = document.getElementById(`${genre}Films`);
     if (!container) {
@@ -454,6 +507,12 @@ function displayFilmsInCarousel(genre, films) {
     const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
 
     if (isSmartphone) {
+        // Mode smartphone : cacher les boutons de navigation
+        const carouselControls = document.querySelectorAll('.carousel-control-prev, .carousel-control-next');
+        carouselControls.forEach(control => {
+            control.style.display = 'none'; // Cacher les boutons
+        });
+
         // Mode smartphone : afficher 3 films à la fois
         const maxVisibleFilms = 3;
         let currentVisibleCount = 0;
@@ -558,29 +617,6 @@ function displayFilmsInCarousel(genre, films) {
         });
     });
 }
-
-// Fonction pour initialiser le carrousel avec Bootstrap
-// Assurez-vous que cette fonction est bien définie quelque part dans votre code
-function initCarousel(genre) {
-    const carouselElement = document.getElementById(`${genre}Films`);
-    if (carouselElement) {
-        new bootstrap.Carousel(carouselElement, {
-            interval: 5000,  // Intervalle de 5 secondes entre les slides
-            ride: 'carousel'
-        });
-    } else {
-        console.error(`Carrousel pour le genre ${genre} introuvable.`);
-    }
-}
-// Fonction pour capitaliser la première lettre du genre
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-// Appel de la fonction pour récupérer les films pour chaque genre
-genresToDisplay.forEach(genre => {
-    fetchFilmsByGenre(genre);  // Récupérer les films pour chaque genre
-});
 
 // Appeler la fonction pour récupérer les films généraux (si nécessaire)
 fetchData();
