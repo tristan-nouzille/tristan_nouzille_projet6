@@ -35,68 +35,57 @@ function safeSetItem(key, value) {
 async function displayFilmsForPage(genreName, currentPage, filmsPerPage = 24) {
     const offset = (currentPage - 1) * filmsPerPage;
 
-    // Vérification des films en sessionStorage
-    let filmsByGenre = JSON.parse(sessionStorage.getItem(`films_${genreName}`));
+    // Récupération des films pour cette page via une requête
+    try {
+        const filmsByGenre = await fetchFilmsByGenre(genreName, offset, filmsPerPage);
+        const sortedFilms = filmsByGenre.sort((a, b) => {
+            const ratingA = parseFloat(a.imdb_score) || 0;
+            const ratingB = parseFloat(b.imdb_score) || 0;
+            return ratingB - ratingA;
+        });
 
-    if (!filmsByGenre) {
-        try {
-            filmsByGenre = await fetchFilmsByGenre(genreName);
-            
-            // Limite à 1000 films maximum
-            if (filmsByGenre.length > 1000) {
-                filmsByGenre = filmsByGenre.slice(0, 2000);
-            }
-            
-            safeSetItem(`films_${genreName}`, JSON.stringify(filmsByGenre));
-        } catch (error) {
-            console.error('Erreur lors de la récupération des films :', error);
-            return;
-        }
+        renderFilms(sortedFilms);
+        updatePagination(currentPage, filmsByGenre.total, filmsPerPage);
+        lazyLoadImages();
+    } catch (error) {
+        console.error('Erreur lors de la récupération des films :', error);
     }
+}
 
-    const sortedFilms = filmsByGenre.sort((a, b) => {
-        const ratingA = parseFloat(a.imdb_score) || 0;
-        const ratingB = parseFloat(b.imdb_score) || 0;
-        return ratingB - ratingA;
-    });
-
-    const paginatedFilms = sortedFilms.slice(offset, offset + filmsPerPage);
-
+// Fonction pour afficher les films dans le conteneur
+function renderFilms(films) {
     const filmsContainer = document.getElementById('filmsContainer');
     if (!filmsContainer) return;
 
     filmsContainer.innerHTML = '<p>Chargement des films...</p>';
 
-    const filmElements = await Promise.all(
-        paginatedFilms.map(async (film) => createFilmElement(film))
-    );
-
+    const filmElements = films.map((film) => createFilmElement(film));
     filmsContainer.innerHTML = '';
     const rowElement = document.createElement('div');
     rowElement.classList.add('row');
 
     filmElements.forEach((filmElement) => {
         const colElement = document.createElement('div');
-        colElement.classList.add('col-12', 'col-sm-6', 'col-md-3', 'col-lg-2'); // 4 images par ligne
+        colElement.classList.add('col-12', 'col-sm-6', 'col-md-3', 'col-lg-2');
         colElement.appendChild(filmElement);
         rowElement.appendChild(colElement);
     });
 
     filmsContainer.appendChild(rowElement);
-    updatePagination(currentPage, sortedFilms.length, filmsPerPage);
-
-    lazyLoadImages();
 }
 
 // Fonction pour créer un élément représentant un film
-async function createFilmElement(film) {
+function createFilmElement(film) {
     const filmElement = document.createElement('div');
     filmElement.classList.add('film-item', 'mb-3');
 
-    const imageUrl = await preloadImage(film.image_url || '/frontend/assets/images/default-image.jpg.png');
     filmElement.innerHTML = `  
         <div class="film-image-container">
-            <img data-src="${imageUrl}" class="img-fluid lazy-image" alt="${film.title}" loading="lazy" onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
+            <img data-src="${film.image_url || '/frontend/assets/images/default-image.jpg.png'}" 
+                 class="img-fluid lazy-image" 
+                 alt="${film.title}" 
+                 loading="lazy" 
+                 onerror="this.src='/frontend/assets/images/default-image.jpg.png';">
             <div class="overlay">
                 <h4>${film.title}</h4>
                 <button data-film-id="${film.id}" class="btn btn-secondary btn-sm detailsButton">Détails</button>
@@ -201,8 +190,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await displayFilmsForPage(genreName, currentPage, filmsPerPage);
 });
 
-// Debugging pour vérifier le chargement
-console.log("categorie.js est bien chargé");
+
+
 
 
 
