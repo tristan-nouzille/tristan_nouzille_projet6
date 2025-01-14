@@ -312,7 +312,6 @@ export function showFilmDetails(film) {
                     <p><strong>Acteurs :</strong> ${filmDetails.actors.join(', ')}</p>
                     <p><strong>Scénaristes :</strong> ${filmDetails.writers.join(', ')}</p>
                     <p><strong>Genres :</strong> ${filmDetails.genres.join(', ')}</p>
-                    <p><a href="${filmDetails.imdb_url}" target="_blank">Voir sur IMDb</a></p>
                 `;
             } else {
                 filmDetailsContent.innerHTML = '<p>Aucun détail disponible pour ce film.</p>';

@@ -251,6 +251,12 @@ function showError(message) {
 document.addEventListener('DOMContentLoaded', () => {
     genreName = new URLSearchParams(window.location.search).get('genre') || 'action'; // Récupérer le genre depuis l'URL ou utiliser un genre par défaut
     currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1; // Récupérer la page ou mettre 1 par défaut
+
+    const categoryTitle = document.getElementById('categoryTitle');
+    if (categoryTitle) {
+        categoryTitle.textContent = `Films pour la catégorie : ${genreName}`;
+    }
+
     displayFilmsForPage(currentPage, filmsPerPage);
 });
 
