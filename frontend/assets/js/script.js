@@ -132,68 +132,42 @@ export async function fetchAndDisplayGenres(selectedGenre = null) {
 }
 
 // Fonction pour récupérer les films par genre avec une limite
-export async function fetchFilmsByGenre(genre, limit = 24) {
-    if (!genre || typeof genre !== 'string' || genre.trim() === '') {
-        console.error("Le genre fourni est invalide ou manquant.");
+async function fetchFilmsByGenre(genre, limit = null) {
+    if (!genre || genre.trim() === '') {
+        console.error("Aucun genre sélectionné.");
         return [];
     }
 
-    const currentPage = window.location.pathname.split('/').pop(); // Vérifie le nom de la page actuelle
-    let filmsLimit = limit;  // Définit la limite par défaut
-
-    // Si l'on est sur category.html, on récupère tous les films du genre sans limite
-    if (currentPage === 'category.html') {
-        filmsLimit = Infinity;  // Pas de limite de films
-        console.log("Aucune limite de films définie pour la page category.html");
-    }
-
-    // Vérifie si le genre est déjà dans le cache
-    if (genreCache.has(genre)) {
-        console.log(`Films pour le genre "${genre}" récupérés depuis le cache.`);
-        const cachedFilms = genreCache.get(genre);
-        return cachedFilms.slice(0, filmsLimit); // Limite les films si nécessaire
-    }
-
+    const apiUrl = `${apiUrlFilmsByGenre}${genre}&ordering=-imdb_score`;  // Trie par score IMDb décroissant
     let allFilms = [];
-    const apiUrl = `${apiUrlFilmsByGenre}${genre.trim()}&ordering=-imdb_score`; // API pour récupérer les films par genre
-
-    async function fetchPage(url) {
-        if (!url || allFilms.length >= filmsLimit) return; // Arrêter la récupération si la limite est atteinte
-
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Erreur lors de la récupération des films pour "${genre}"`);
-
-            const data = await response.json();
-            if (data.results && Array.isArray(data.results)) {
-                allFilms = allFilms.concat(data.results);
-
-                // Si la limite est atteinte, arrête les requêtes supplémentaires
-                if (allFilms.length >= filmsLimit) {
-                    allFilms = allFilms.slice(0, filmsLimit); // Limiter à la quantité définie
-                    return; // Arrêter la récupération
-                }
-            }
-
-            // Continue de récupérer si une page suivante existe et la limite n'est pas atteinte
-            if (data.next && allFilms.length < filmsLimit) {
-                await fetchPage(data.next);
-            }
-        } catch (error) {
-            console.error(`Erreur dans la récupération des films pour "${genre}" :`, error);
-        }
-    }
+    let nextPageUrl = apiUrl;
 
     try {
-        await fetchPage(apiUrl);
+        while (nextPageUrl && (limit === null || allFilms.length < limit)) {
+            const response = await fetch(nextPageUrl);
 
-        // Ajoute les films récupérés au cache
-        genreCache.set(genre, allFilms);
+            if (!response.ok) {
+                throw new Error(`Erreur lors de la récupération des films pour "${genre}", code: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            if (!data.results || !Array.isArray(data.results)) {
+                throw new Error(`Pas de films trouvés pour "${genre}" dans la réponse de l'API.`);
+            }
+
+            allFilms = allFilms.concat(data.results);  // Ajoute les films récupérés à la liste
+
+            nextPageUrl = data.next;  // Mise à jour de l'URL pour la page suivante
+        }
 
         console.log(`Films récupérés pour "${genre}" : ${allFilms.length} films`);
-        return allFilms.slice(0, filmsLimit); // Retourne les films avec la limite appliquée
+
+        // Affichage des films dans le carrousel (fonction à définir selon la structure de ton HTML)
+        displayFilmsInCarousel(genre, allFilms);  // Affiche les films dans le carrousel
+        return allFilms;
     } catch (error) {
-        console.error(`Erreur lors de la récupération des films pour "${genre}" :`, error);
+        console.error(`Erreur dans la récupération des films pour "${genre}" :`, error);
         return [];
     }
 }

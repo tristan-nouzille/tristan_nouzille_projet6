@@ -7,6 +7,13 @@ body {
     
 }
 
+main {
+    min-height: 100vh; /* 100% de la hauteur de la fenêtre */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Permet de distribuer l'espace pour que le footer ne monte pas */
+}
+
 p, h1, h2, h3, a {
     color: aliceblue !important;
 }
@@ -281,20 +288,38 @@ section {
 /* Le footer est positionné de manière fixe en bas de la page */
 footer {
     width: 100%;
-    height: 100%;
     background-color: #61787F;
     color: white;
     text-align: center;
     padding: 10px 0;
     position: absolute;
 }
- 
-/* Si tu veux que le contenu principal ne soit pas caché sous le footer */
-main {
-    flex-grow: 1; /* Cela permet à l'élément main de prendre tout l'espace disponible */
-    padding-bottom: 60px; /* On donne un padding égal à la hauteur du footer pour ne pas que le contenu soit caché */
+
+/* Ajout du style pour le spinner dans la zone des films */
+.spinner-container {
+    position: fixed; /* Utilisez fixed pour le positionner par rapport à la fenêtre */
+    top: 50%; /* Positionne au centre vertical */
+    left: 50%; /* Positionne au centre horizontal */
+    transform: translate(-50%, -50%); /* Ajuste pour centrer parfaitement */
+    z-index: 9999; /* Assurez-vous que le spinner est au-dessus des autres éléments */
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid red;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
 
 @media (max-width: 1400px) {
 

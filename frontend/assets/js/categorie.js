@@ -1,12 +1,13 @@
-import {
-    fetchFilmsByGenre,
-    fetchFilmDetails,
-    showFilmDetails,
-} from './script.js';
+import { fetchFilmDetails, showFilmDetails } from './script.js';
 
-let genreName;
+const apiUrlFilmsByGenre = 'http://localhost:8000/api/v1/titles/?genre=';
+let genreName = ''; // Pas de genre par défaut
+let currentPage = 1;
+let totalFilms = 0;
+const genreCache = new Map();
+const filmsPerPage = 24;
 
-// Fonction pour précharger les images
+// Précharger une image
 async function preloadImage(url) {
     return new Promise((resolve) => {
         const img = new Image();
@@ -16,72 +17,124 @@ async function preloadImage(url) {
     });
 }
 
-// Fonction pour stocker les données dans sessionStorage avec gestion du quota
-function safeSetItem(key, value) {
-    try {
-        sessionStorage.setItem(key, value);
-    } catch (error) {
-        if (error.name === "QuotaExceededError") {
-            console.warn("Quota de sessionStorage dépassé. Nettoyage en cours...");
-            sessionStorage.clear();
-            sessionStorage.setItem(key, value);
-        } else {
-            console.error("Erreur lors de l'enregistrement dans sessionStorage :", error);
-        }
-    }
-}
-
-// Fonction pour afficher les films d'une page
-async function displayFilmsForPage(genreName, currentPage, filmsPerPage = 24) {
+// Afficher les films pour une page donnée
+async function displayFilmsForPage(currentPage = 1, filmsPerPage = 24) {
     const offset = (currentPage - 1) * filmsPerPage;
 
-    // Récupération des films pour cette page via une requête
-    try {
-        const filmsByGenre = await fetchFilmsByGenre(genreName, offset, filmsPerPage);
-        const sortedFilms = filmsByGenre.sort((a, b) => {
-            const ratingA = parseFloat(a.imdb_score) || 0;
-            const ratingB = parseFloat(b.imdb_score) || 0;
-            return ratingB - ratingA;
-        });
+    if (!genreName) {
+        console.error('Aucun genre sélectionné. Veuillez choisir un genre pour afficher les films.');
+        showError('Veuillez sélectionner une catégorie pour afficher les films.');
+        return;
+    }
 
-        renderFilms(sortedFilms);
-        updatePagination(currentPage, filmsByGenre.total, filmsPerPage);
+    console.log(`Genre sélectionné : ${genreName}, Page : ${currentPage}, Offset : ${offset}`);
+    
+    try {
+        console.log(`Chargement des films pour le genre: ${genreName}, page: ${currentPage}, offset: ${offset}`);
+        
+        // Forcer la récupération des films depuis l'API en ignorant le cache
+        const { films = [], totalPages } = await fetchFilmsByGenre(genreName, filmsPerPage, offset, true);  // `true` pour ignorer le cache
+
+        if (films.length === 0) {
+            console.log('Aucun film trouvé pour cette catégorie.');
+            showError('Aucun film trouvé pour cette catégorie.');
+            return;
+        }
+
+        console.log(`Films récupérés pour le genre ${genreName}:`, films);
+        renderFilms(films);
+        updatePagination(currentPage, totalPages);
         lazyLoadImages();
     } catch (error) {
         console.error('Erreur lors de la récupération des films :', error);
+        showError('Erreur lors du chargement des films. Veuillez réessayer plus tard.');
     }
 }
 
-// Fonction pour afficher les films dans le conteneur
+// Gérer la récupération des films par genre
+async function fetchFilmsByGenre(genre, limit = null, offset = 0, ignoreCache = false) {
+    console.log(`Requête pour le genre: ${genre}, offset: ${offset}, limit: ${limit}`);
+
+    if (!genre || typeof genre !== 'string' || genre.trim() === '') {
+        console.error('Aucun genre fourni ou genre invalide.');
+        return [];
+    }
+
+    // Si l'option ignoreCache est activée, forcer la récupération depuis l'API
+    if (!ignoreCache && genreCache.has(genre)) {
+        const cachedFilms = genreCache.get(genre);
+        console.log('Films récupérés depuis le cache');
+        return cachedFilms.slice(offset, offset + limit);
+    }
+
+    const films = [];
+    let totalFilms = 0;
+    let nextPageUrl = `${apiUrlFilmsByGenre}${encodeURIComponent(genre.trim())}&ordering=-imdb_score&limit=${limit}&offset=${offset}`;
+
+    while (nextPageUrl) {
+        try {
+            console.log(`Requête API pour ${nextPageUrl}`);
+            const response = await fetch(nextPageUrl);
+            if (!response.ok) throw new Error(`Erreur lors de la récupération des films pour "${genre}"`);
+
+            const data = await response.json();
+            console.log('Données API récupérées:', data);
+
+            if (data.results && Array.isArray(data.results)) {
+                films.push(...data.results);
+            }
+
+            totalFilms = data.count; // Mettre à jour le nombre total de films
+            nextPageUrl = data.next; // Suivant
+
+            // Si on a atteint la limite de films souhaitée, sortir de la boucle
+            if (films.length >= offset + limit) {
+                break;
+            }
+        } catch (error) {
+            console.error(`Erreur lors de la récupération des films pour "${genre}" :`, error);
+            break;
+        }
+    }
+
+    // Mettre en cache les films récupérés, mais uniquement si on n'ignore pas le cache
+    if (!ignoreCache) {
+        genreCache.set(genre, films);
+    }
+
+    // Calcul du total de pages
+    const totalPages = Math.ceil(totalFilms / limit);
+
+    return { films: films.slice(offset, offset + limit), totalPages };
+}
+
+// Afficher les films dans le conteneur
 function renderFilms(films) {
     const filmsContainer = document.getElementById('filmsContainer');
     if (!filmsContainer) return;
 
-    filmsContainer.innerHTML = '<p>Chargement des films...</p>';
-
-    const filmElements = films.map((film) => createFilmElement(film));
     filmsContainer.innerHTML = '';
     const rowElement = document.createElement('div');
     rowElement.classList.add('row');
 
-    filmElements.forEach((filmElement) => {
+    films.forEach((film) => {
         const colElement = document.createElement('div');
         colElement.classList.add('col-12', 'col-sm-6', 'col-md-3', 'col-lg-2');
-        colElement.appendChild(filmElement);
+        colElement.appendChild(createFilmElement(film));
         rowElement.appendChild(colElement);
     });
 
     filmsContainer.appendChild(rowElement);
 }
 
-// Fonction pour créer un élément représentant un film
+// Créer un élément HTML pour un film
 function createFilmElement(film) {
     const filmElement = document.createElement('div');
-    filmElement.classList.add('film-item', 'mb-3');
+    filmElement.classList.add('film-item', 'mb-3', 'fade-in');
 
-    filmElement.innerHTML = `  
+    filmElement.innerHTML = `
         <div class="film-image-container">
-            <img data-src="${film.image_url || '/frontend/assets/images/default-image.jpg.png'}" 
+            <img data-src="${film.image_url || preloadImage}" 
                  class="img-fluid lazy-image" 
                  alt="${film.title}" 
                  loading="lazy" 
@@ -93,8 +146,7 @@ function createFilmElement(film) {
         </div>
     `;
 
-    const detailsButton = filmElement.querySelector('.detailsButton');
-    detailsButton.addEventListener('click', () => {
+    filmElement.querySelector('.detailsButton').addEventListener('click', () => {
         fetchFilmDetails(film.id)
             .then(showFilmDetails)
             .catch((error) => {
@@ -105,15 +157,10 @@ function createFilmElement(film) {
     return filmElement;
 }
 
-// Fonction pour mettre à jour la pagination
-function updatePagination(currentPage, totalFilms, filmsPerPage) {
-    const totalPages = Math.ceil(totalFilms / filmsPerPage);
+// Mettre à jour la pagination
+function updatePagination(currentPage, totalPages) {
     const paginationElement = document.getElementById('pagination');
-
-    if (!paginationElement) {
-        console.error("L'élément avec l'ID 'pagination' est introuvable.");
-        return;
-    }
+    if (!paginationElement) return;
 
     paginationElement.innerHTML = '';
 
@@ -126,69 +173,134 @@ function updatePagination(currentPage, totalFilms, filmsPerPage) {
         return button;
     };
 
-    paginationElement.appendChild(
-        createButton('Précédent', currentPage === 1, () => {
-            updateURL(currentPage - 1);
-            displayFilmsForPage(genreName, currentPage - 1, filmsPerPage);
-        })
-    );
+    const prevPageButton = createButton('Précédent', currentPage === 1, () => {
+        if (currentPage > 1) {
+            currentPage -= 1;
+            updateURL(currentPage);
+            displayFilmsForPage(currentPage, filmsPerPage);
+        }
+    });
 
     const pageNumber = document.createElement('span');
     pageNumber.classList.add('page-number', 'mx-3', 'text-white');
-    pageNumber.textContent = `Page ${currentPage} sur ${totalPages}`;
+    pageNumber.textContent = `Page ${currentPage}`;
+
+    const nextPageButton = createButton('Suivant', currentPage >= totalPages, () => {
+        if (currentPage < totalPages) {
+            currentPage += 1;
+            updateURL(currentPage);
+            displayFilmsForPage(currentPage, filmsPerPage); // Forcer le chargement de la page suivante
+        }
+    });
+
+    paginationElement.appendChild(prevPageButton);
     paginationElement.appendChild(pageNumber);
-
-    paginationElement.appendChild(
-        createButton('Suivant', currentPage === totalPages, () => {
-            updateURL(currentPage + 1);
-            displayFilmsForPage(genreName, currentPage + 1, filmsPerPage);
-        })
-    );
+    paginationElement.appendChild(nextPageButton);
 }
 
-// Fonction pour mettre à jour l'URL sans recharger la page
-function updateURL(pageNumber) {
-    const currentURL = new URL(window.location.href);
-    currentURL.searchParams.set('page', pageNumber);
-    window.history.pushState({}, '', currentURL);
+function updateURL(currentPage) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('genre', genreName);  // Assurez-vous que genreName est toujours disponible
+    urlParams.set('page', currentPage); // Mettre à jour la page dans l'URL
+    window.history.pushState({}, '', '?' + urlParams.toString());  // Mise à jour de l'URL sans recharger la page
 }
 
-// Lazy loading des images avec IntersectionObserver
+// Lazy loading des images avec amélioration de la fluidité
 function lazyLoadImages() {
     const images = document.querySelectorAll('img.lazy-image');
     const observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach((entry) => {
+        entries.forEach(async (entry) => {
             if (entry.isIntersecting) {
                 const img = entry.target;
-                img.src = img.dataset.src;
-                img.classList.remove('lazy-image');
+                const preloadedImage = await preloadImage(img.dataset.src);
+                img.src = preloadedImage;
                 observer.unobserve(img);
             }
         });
-    });
+    }, { threshold: 0.5 });
 
-    images.forEach((img) => observer.observe(img));
+    images.forEach((image) => {
+        observer.observe(image);
+    });
 }
 
-// Exécution lorsque la page est chargée
-document.addEventListener('DOMContentLoaded', async () => {
-    const filmsPerPage = 24;
-    const urlParams = new URLSearchParams(window.location.search);
-    genreName = urlParams.get('genre');
-    const currentPage = parseInt(urlParams.get('page') || '1', 10);
+// Afficher une erreur
+function showError(message) {
+    const errorMessage = document.createElement('div');
+    errorMessage.classList.add('alert', 'alert-danger', 'error-message');
+    errorMessage.textContent = message;
 
-    if (!genreName) {
-        console.error("Aucune catégorie spécifiée dans l'URL.");
-        return;
-    }
+    const filmsContainer = document.getElementById('filmsContainer');
+    filmsContainer.innerHTML = '';
+    filmsContainer.appendChild(errorMessage);
+}
 
-    const categoryTitle = document.getElementById('categoryTitle');
-    if (categoryTitle) {
-        categoryTitle.textContent = `Films pour la catégorie : ${genreName}`;
-    }
-
-    await displayFilmsForPage(genreName, currentPage, filmsPerPage);
+// Event listener pour charger les films au démarrage
+document.addEventListener('DOMContentLoaded', () => {
+    genreName = new URLSearchParams(window.location.search).get('genre') || 'action'; // Récupérer le genre depuis l'URL ou utiliser un genre par défaut
+    currentPage = parseInt(new URLSearchParams(window.location.search).get('page')) || 1; // Récupérer la page ou mettre 1 par défaut
+    displayFilmsForPage(currentPage, filmsPerPage);
 });
+
+
+export { displayFilmsForPage, updateURL };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
