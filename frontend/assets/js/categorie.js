@@ -117,10 +117,22 @@ function renderFilms(films) {
     const rowElement = document.createElement('div');
     rowElement.classList.add('row');
 
+    // Vérifier si le nombre de films est inférieur à 24
+    const isSmallCategory = films.length < 24;
+
     films.forEach((film) => {
         const colElement = document.createElement('div');
         colElement.classList.add('col-12', 'col-sm-6', 'col-md-3', 'col-lg-2');
-        colElement.appendChild(createFilmElement(film));
+        const filmElement = createFilmElement(film);
+
+        // Si c'est une catégorie avec moins de 24 films, agrandir l'image en ajustant ses dimensions
+        if (isSmallCategory) {
+            const img = filmElement.querySelector('img');
+            img.style.width = '1000px';  // Agrandir l'image à 100% de la largeur du conteneur
+            img.style.height = 'auto'; // Garder l'aspect ratio
+        }
+
+        colElement.appendChild(filmElement);
         rowElement.appendChild(colElement);
     });
 
@@ -244,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 export { displayFilmsForPage, updateURL };
+
 
 
 
